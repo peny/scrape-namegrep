@@ -8,9 +8,6 @@
   "buildpacks": [
     {
       "url": "heroku/nodejs"
-    },
-    {
-      "url": "https://github.com/mxschmitt/heroku-playwright"
     }
   ],
   "formation": {
@@ -30,6 +27,6 @@
     }
   },
   "scripts": {
-    "postdeploy": "npx playwright install chromium"
+    "heroku-postbuild": "npx playwright install chromium"
   }
 }

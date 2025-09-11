@@ -2,8 +2,8 @@
   "name": "namegrep-scraper",
   "type": "web",
   "env": "node",
-  "buildCommand": "npm install && npm run install-browsers",
-  "startCommand": "node index.js",
+  "buildCommand": "npm install && npx playwright install chromium",
+  "startCommand": "node check-browser.js",
   "envVars": [
     {
       "key": "NODE_ENV",
