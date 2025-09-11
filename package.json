@@ -7,10 +7,10 @@
   "scripts": {
     "start": "node index.js",
     "build": "npx playwright install chromium",
-    "test": "node scraper.js",
+    "test": "node scraper-backup.js",
     "api": "node api.js",
     "dev": "node api.js",
-    "scraper": "node scraper.js"
+    "scraper": "node scraper-backup.js"
   },
   "keywords": ["scraper", "puppeteer", "namegrep", "domains"],
   "author": "",
