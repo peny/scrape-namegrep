@@ -1,0 +1,21 @@
+{
+  "name": "namegrep-scraper",
+  "type": "web",
+  "env": "node",
+  "buildCommand": "npm ci && npx playwright install chromium",
+  "startCommand": "node api.js",
+  "envVars": [
+    {
+      "key": "NODE_ENV",
+      "value": "production"
+    },
+    {
+      "key": "PLAYWRIGHT_BROWSERS_PATH",
+      "value": "0"
+    },
+    {
+      "key": "PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD",
+      "value": "0"
+    }
+  ]
+}
