@@ -3,7 +3,7 @@
   "type": "web",
   "env": "node",
   "buildCommand": "npm ci && npx playwright install chromium",
-  "startCommand": "node api.js",
+  "startCommand": "node index.js",
   "envVars": [
     {
       "key": "NODE_ENV",

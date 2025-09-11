@@ -3,7 +3,7 @@ services:
     name: namegrep-scraper
     env: node
     buildCommand: npm ci && npx playwright install chromium
-    startCommand: npm run start
+           startCommand: node index.js
     envVars:
       - key: NODE_ENV
         value: production
