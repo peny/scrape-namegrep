@@ -2,12 +2,14 @@
   "name": "namegrep-scraper",
   "version": "1.0.0",
   "description": "A Node.js scraper for namegrep.com using headless browser",
-  "main": "scraper.js",
+  "main": "api.js",
   "scripts": {
-    "start": "node scraper.js",
+    "start": "node api.js",
+    "build": "npx playwright install chromium",
     "test": "node scraper.js",
     "api": "node api.js",
-    "dev": "node api.js"
+    "dev": "node api.js",
+    "scraper": "node scraper.js"
   },
   "keywords": ["scraper", "puppeteer", "namegrep", "domains"],
   "author": "",

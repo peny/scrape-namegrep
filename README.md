@@ -121,6 +121,20 @@ node scraper.js "tech.*[0-9]{3}"
 - Internet connection
 - Playwright browser binaries
 
+## Deployment
+
+### Render.com
+1. Connect your GitHub repository to Render
+2. Use these settings:
+   - **Build Command**: `npm install && npx playwright install chromium`
+   - **Start Command**: `npm start`
+   - **Environment**: Node.js
+3. The app will be available at your Render URL
+
+### Other Platforms
+- Ensure Playwright browsers are installed: `npx playwright install chromium`
+- Set `NODE_ENV=production` for production deployments
+
 ## Troubleshooting
 
 ### No Results Found
