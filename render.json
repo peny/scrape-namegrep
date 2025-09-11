@@ -2,7 +2,7 @@
   "name": "namegrep-scraper",
   "type": "web",
   "env": "node",
-  "buildCommand": "npm ci && npm run install-browsers",
+  "buildCommand": "npm install && npm run install-browsers",
   "startCommand": "node index.js",
   "envVars": [
     {

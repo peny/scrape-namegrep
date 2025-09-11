@@ -13,21 +13,55 @@ class NameGrepAPIScraper {
     const isProduction = process.env.NODE_ENV === 'production';
     console.log('Environment:', isProduction ? 'production' : 'development');
     
-    this.browser = await chromium.launch({
-      headless: true,
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-accelerated-2d-canvas',
-        '--no-first-run',
-        '--no-zygote',
-        '--single-process',
-        '--disable-gpu',
-        '--disable-web-security',
-        '--disable-features=VizDisplayCompositor'
-      ]
-    });
+    try {
+      this.browser = await chromium.launch({
+        headless: true,
+        args: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-accelerated-2d-canvas',
+          '--no-first-run',
+          '--no-zygote',
+          '--single-process',
+          '--disable-gpu',
+          '--disable-web-security',
+          '--disable-features=VizDisplayCompositor'
+        ]
+      });
+    } catch (error) {
+      if (error.message.includes('Executable doesn\'t exist')) {
+        console.log('Browser not found, attempting to install...');
+        console.log('This should have been done during build, but installing now as fallback...');
+        
+        const { execSync } = require('child_process');
+        try {
+          execSync('npx playwright install chromium', { stdio: 'inherit' });
+          console.log('Browser installed, retrying launch...');
+          
+          this.browser = await chromium.launch({
+            headless: true,
+            args: [
+              '--no-sandbox',
+              '--disable-setuid-sandbox',
+              '--disable-dev-shm-usage',
+              '--disable-accelerated-2d-canvas',
+              '--no-first-run',
+              '--no-zygote',
+              '--single-process',
+              '--disable-gpu',
+              '--disable-web-security',
+              '--disable-features=VizDisplayCompositor'
+            ]
+          });
+        } catch (installError) {
+          console.error('Failed to install browser:', installError.message);
+          throw new Error('Browser installation failed. Please check build process.');
+        }
+      } else {
+        throw error;
+      }
+    }
     
     const context = await this.browser.newContext({
       userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',

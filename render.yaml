@@ -3,7 +3,7 @@ services:
     name: namegrep-scraper
     env: node
     nodeVersion: 20
-    buildCommand: npm ci && npm run install-browsers
+    buildCommand: npm install && npm run install-browsers
            startCommand: node index.js
     envVars:
       - key: NODE_ENV

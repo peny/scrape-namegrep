@@ -6,7 +6,7 @@
   "homepage": "https://github.com/peny/scrape-namegrep",
   "scripts": {
     "start": "node index.js",
-    "build": "npm ci && npm run install-browsers",
+    "build": "npm install && npm run install-browsers",
     "test": "node scraper-backup.js",
     "api": "node api.js",
     "dev": "node api.js",
