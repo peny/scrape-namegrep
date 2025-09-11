@@ -1,0 +1,20 @@
+{
+  "name": "namegrep-scraper",
+  "version": "1.0.0",
+  "description": "A Node.js scraper for namegrep.com using headless browser",
+  "main": "scraper.js",
+  "scripts": {
+    "start": "node scraper.js",
+    "test": "node scraper.js",
+    "api": "node api.js",
+    "dev": "node api.js"
+  },
+  "keywords": ["scraper", "puppeteer", "namegrep", "domains"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "playwright": "^1.40.0",
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  }
+}

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Petter och Pers företagsnamns-sökar-app</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1 class="title">🔍 NameGrep Domain Search</h1>
+            <p class="subtitle">Find available .com domains using regex patterns</p>
+        </header>
+
+        <main class="main">
+            <form class="search-form" id="searchForm">
+                <div class="input-group">
+                    <label for="regexPattern" class="input-label">Regex Pattern:</label>
+                    <input 
+                        type="text" 
+                        id="regexPattern" 
+                        name="regexPattern" 
+                        class="search-input"
+                        placeholder="Enter regex pattern (e.g., ^pe.{2,3}a$)"
+                        value="^pe.{2,3}a$"
+                        required
+                    >
+                    <div class="input-help">
+                        <small>Use regex syntax. Example: <code>^pe.{2,3}a$</code> finds domains starting with "pe", followed by 2-3 characters, ending with "a"</small>
+                    </div>
+                </div>
+                
+                <button type="submit" class="search-button" id="searchButton">
+                    <span class="button-text">Search Domains</span>
+                    <span class="button-spinner" id="spinner" style="display: none;">⏳</span>
+                </button>
+            </form>
+
+            <div class="results-section" id="resultsSection" style="display: none;">
+                <div class="results-header">
+                    <h2 class="results-title">Search Results</h2>
+                    <div class="results-meta">
+                        <span class="pattern-display" id="patternDisplay"></span>
+                        <span class="count-display" id="countDisplay"></span>
+                    </div>
+                </div>
+                
+                <div class="domains-container">
+                    <div class="domains-list" id="domainsList"></div>
+                </div>
+                
+                <div class="results-actions">
+                    <button class="action-button" id="copyButton">📋 Copy Results</button>
+                    <button class="action-button" id="downloadButton">💾 Download as TXT</button>
+                </div>
+            </div>
+
+            <div class="error-section" id="errorSection" style="display: none;">
+                <div class="error-message" id="errorMessage"></div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>Powered by NameGrep.com • Built with Node.js & Playwright</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
