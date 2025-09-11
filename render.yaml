@@ -2,10 +2,12 @@ services:
   - type: web
     name: namegrep-scraper
     env: node
-    buildCommand: npm install && npx playwright install chromium
-    startCommand: npm start
+    buildCommand: npm ci && npx playwright install chromium
+    startCommand: npm run start
     envVars:
       - key: NODE_ENV
         value: production
       - key: PLAYWRIGHT_BROWSERS_PATH
+        value: 0
+      - key: PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD
         value: 0

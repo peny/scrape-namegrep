@@ -1,0 +1,3 @@
+buildpacks:
+  - https://github.com/heroku/heroku-buildpack-nodejs
+  - https://github.com/mxschmitt/heroku-playwright
