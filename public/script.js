@@ -235,6 +235,7 @@ document.addEventListener('DOMContentLoaded', () => {
 document.addEventListener('DOMContentLoaded', () => {
     const input = document.getElementById('regexPattern');
     const examples = [
+        '^pr.{1,2}a$',
         '^pe.{2,3}a$',
         '^test.*',
         '.*shop.*',

@@ -69,107 +69,178 @@ class NameGrepAPIScraper {
       // Wait for any dynamic content to load
       await this.page.waitForTimeout(3000);
 
+      // Debug: Take a screenshot and get page content
+      await this.page.screenshot({ path: 'api-debug.png', fullPage: true });
+      console.log('API debug screenshot saved as api-debug.png');
+      
+      // Get page content for debugging
+      const pageContent = await this.page.content();
+      console.log('Page content length:', pageContent.length);
+      
+      // Check what's actually on the page
+      const pageInfo = await this.page.evaluate(() => {
+        return {
+          title: document.title,
+          url: window.location.href,
+          bodyText: document.body.textContent.substring(0, 1000),
+          allLinks: Array.from(document.querySelectorAll('a')).map(a => a.href).slice(0, 10),
+          allText: document.body.textContent
+        };
+      });
+      
+      console.log('Page info:', pageInfo);
+      
       // Extract available .com domains from the results
-      const availableComDomains = await this.page.evaluate(() => {
+      const availableComDomains = await this.page.evaluate((pattern) => {
         const domains = [];
         
-        // Look for elements that might indicate domain availability
-        const availabilitySelectors = [
-          '.available', '.unavailable', '.domain-available', '.domain-unavailable',
-          '.status-available', '.status-unavailable', '.available-domain', '.unavailable-domain',
-          'td', 'li', '.result', '.domain', '.name', 'span', 'div'
-        ];
+        // First, let's see what's actually on the page
+        console.log('Searching for pattern:', pattern);
+        console.log('Page title:', document.title);
+        console.log('Current URL:', window.location.href);
         
-        availabilitySelectors.forEach(selector => {
-          const elements = document.querySelectorAll(selector);
-          elements.forEach(element => {
-            const text = element.textContent.trim();
-            const className = element.className.toLowerCase();
-            
-            // Check if this element contains a .com domain
-            if (text && text.includes('.com')) {
-              // Extract potential domain from text
-              const domainMatch = text.match(/([a-zA-Z0-9][a-zA-Z0-9.-]*\.com)/g);
-              if (domainMatch) {
-                domainMatch.forEach(domain => {
-                  const cleanDomain = domain.toLowerCase();
-                  
-                  // Check if this element indicates availability
-                  const isAvailable = 
-                    className.includes('available') || 
-                    text.includes('available') ||
-                    text.includes('✓') ||
-                    text.includes('yes') ||
-                    (!className.includes('unavailable') && !text.includes('unavailable') && !text.includes('✗') && !text.includes('no'));
-                  
-                  // Only include if it looks like an available domain
-                  if (isAvailable && cleanDomain.length > 4 && cleanDomain.length < 50) {
-                    domains.push({
-                      domain: cleanDomain,
-                      status: 'available',
-                      source: text.substring(0, 100)
-                    });
-                  }
-                });
-              }
-            }
-          });
-        });
-
-        // Also look for any .com domains in the page text
+        // Look for any text that might be domains
         const allText = document.body.textContent || '';
+        console.log('Total text length:', allText.length);
+        
+        // Look for .com domains in all text
         const comDomains = allText.match(/\b[a-zA-Z0-9][a-zA-Z0-9.-]*\.com\b/g);
+        console.log('Found .com domains in text:', comDomains);
         
-        if (comDomains) {
-          comDomains.forEach(domain => {
-            const cleanDomain = domain.toLowerCase();
+        // Look for any elements that might contain results
+        const allElements = document.querySelectorAll('*');
+        console.log('Total elements on page:', allElements.length);
+        
+        // Look for domain names in .domain elements specifically
+        const domainElements = document.querySelectorAll('.domain');
+        console.log(`Found ${domainElements.length} domain elements`);
+        
+        // Process only first 10 domain elements to avoid too much output
+        const elementsToProcess = Array.from(domainElements).slice(0, 10);
+        console.log(`Processing first ${elementsToProcess.length} domain elements`);
+        
+        elementsToProcess.forEach((element, index) => {
+          const text = element.textContent.trim();
+          console.log(`Domain element ${index}:`, text);
+          
+          if (text && text.length > 1) {
+            // Extract just the domain name part (before any TLD info)
+            const lines = text.split('\n');
+            const firstLine = lines[0].trim();
             
-            // Filter out common false positives
-            if (!cleanDomain.includes('namegrep') && 
-                !cleanDomain.includes('jquery') && 
-                !cleanDomain.includes('github') && 
-                !cleanDomain.includes('google') && 
-                !cleanDomain.includes('mozilla') &&
-                !cleanDomain.includes('facebook') &&
-                !cleanDomain.includes('twitter') &&
-                !cleanDomain.includes('youtube') &&
-                cleanDomain.length > 4 && 
-                cleanDomain.length < 50) {
+            console.log(`First line of element ${index}:`, firstLine);
+            
+            // Check if this looks like a domain name (without TLD)
+            if (firstLine.match(/^[a-zA-Z0-9][a-zA-Z0-9.-]*$/)) {
+              const cleanDomain = firstLine.toLowerCase();
+              console.log(`Clean domain: ${cleanDomain}`);
               
-              // Check if this domain appears in an available context
-              const domainIndex = allText.indexOf(domain);
-              const context = allText.substring(Math.max(0, domainIndex - 50), domainIndex + 50).toLowerCase();
-              
-              const isAvailable = 
-                context.includes('available') ||
-                context.includes('✓') ||
-                context.includes('yes') ||
-                (!context.includes('unavailable') && !context.includes('✗') && !context.includes('no'));
-              
-              if (isAvailable) {
-                domains.push({
-                  domain: cleanDomain,
-                  status: 'available',
-                  source: context
-                });
+              // Filter out common false positives
+              if (!cleanDomain.includes('namegrep') && 
+                  !cleanDomain.includes('jquery') && 
+                  !cleanDomain.includes('github') && 
+                  !cleanDomain.includes('google') && 
+                  !cleanDomain.includes('mozilla') &&
+                  !cleanDomain.includes('facebook') &&
+                  !cleanDomain.includes('twitter') &&
+                  !cleanDomain.includes('youtube') &&
+                  !cleanDomain.includes('amazon') &&
+                  !cleanDomain.includes('microsoft') &&
+                  cleanDomain.length > 1 && 
+                  cleanDomain.length < 20) {
+                
+                // Add .com suffix to create full domain
+                const fullDomain = cleanDomain + '.com';
+                domains.push(fullDomain);
+                console.log('Added domain:', fullDomain);
+              } else {
+                console.log(`Filtered out domain: ${cleanDomain}`);
               }
+            } else {
+              console.log(`First line doesn't match domain pattern: ${firstLine}`);
             }
-          });
-        }
-
-        // Remove duplicates based on domain name
-        const uniqueDomains = [];
-        const seenDomains = new Set();
-        
-        domains.forEach(item => {
-          if (!seenDomains.has(item.domain)) {
-            seenDomains.add(item.domain);
-            uniqueDomains.push(item.domain);
+          } else {
+            console.log(`Element ${index} has no text or too short`);
           }
         });
-
+        
+        // Also look for any existing .com domains in the text
+        const selectors = [
+          '.result', '.name', '.available', '.unavailable',
+          'td', 'li', 'span', 'div', 'p'
+        ];
+        
+        selectors.forEach(selector => {
+          const elements = document.querySelectorAll(selector);
+          if (elements.length > 0) {
+            elements.forEach((element, index) => {
+              const text = element.textContent.trim();
+              if (text && text.includes('.com')) {
+                // Extract .com domains from text
+                const comMatches = text.match(/\b[a-zA-Z0-9][a-zA-Z0-9.-]*\.com\b/g);
+                if (comMatches) {
+                  comMatches.forEach(domain => {
+                    const cleanDomain = domain.toLowerCase();
+                    
+                    // Filter out common false positives
+                    if (!cleanDomain.includes('namegrep') && 
+                        !cleanDomain.includes('jquery') && 
+                        !cleanDomain.includes('github') && 
+                        !cleanDomain.includes('google') && 
+                        !cleanDomain.includes('mozilla') &&
+                        !cleanDomain.includes('facebook') &&
+                        !cleanDomain.includes('twitter') &&
+                        !cleanDomain.includes('youtube') &&
+                        !cleanDomain.includes('amazon') &&
+                        !cleanDomain.includes('microsoft') &&
+                        cleanDomain.length > 4 && 
+                        cleanDomain.length < 50) {
+                      
+                      domains.push(cleanDomain);
+                      console.log('Added existing .com domain:', cleanDomain);
+                    }
+                  });
+                }
+              }
+            });
+          }
+        });
+        
+        // Also check if there are any tables or lists with results
+        const tables = document.querySelectorAll('table');
+        const lists = document.querySelectorAll('ul, ol');
+        
+        console.log('Found tables:', tables.length);
+        console.log('Found lists:', lists.length);
+        
+        tables.forEach((table, index) => {
+          const rows = table.querySelectorAll('tr');
+          console.log(`Table ${index} has ${rows.length} rows`);
+          
+          rows.forEach((row, rowIndex) => {
+            const cells = row.querySelectorAll('td, th');
+            cells.forEach((cell, cellIndex) => {
+              const text = cell.textContent.trim();
+              if (text && text.match(/^[a-zA-Z0-9][a-zA-Z0-9.-]*\.[a-zA-Z]{2,}$/)) {
+                const cleanDomain = text.toLowerCase();
+                if (!cleanDomain.includes('namegrep') && 
+                    !cleanDomain.includes('jquery') && 
+                    cleanDomain.length > 4 && 
+                    cleanDomain.length < 50) {
+                  domains.push(cleanDomain);
+                  console.log('Added domain from table:', cleanDomain);
+                }
+              }
+            });
+          });
+        });
+        
+        // Remove duplicates
+        const uniqueDomains = [...new Set(domains)];
+        console.log('Final unique domains:', uniqueDomains);
+        
         return uniqueDomains;
-      });
+      }, regexPattern);
 
       console.log(`Found ${availableComDomains.length} available .com domains`);
       return availableComDomains;
