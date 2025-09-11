@@ -6,11 +6,13 @@
   "homepage": "https://github.com/peny/scrape-namegrep",
   "scripts": {
     "start": "node index.js",
-    "build": "npm ci && npx playwright install chromium",
+    "build": "npm ci && npm run install-browsers",
     "test": "node scraper-backup.js",
     "api": "node api.js",
     "dev": "node api.js",
-    "scraper": "node scraper-backup.js"
+    "scraper": "node scraper-backup.js",
+    "postinstall": "npx playwright install chromium",
+    "install-browsers": "npx playwright install chromium"
   },
   "keywords": ["scraper", "puppeteer", "namegrep", "domains"],
   "author": "",
@@ -19,6 +21,9 @@
     "playwright": "^1.40.0",
     "express": "^4.18.2",
     "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.40.0"
   },
   "engines": {
     "node": ">=20.0.0"
