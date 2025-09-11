@@ -8,19 +8,59 @@ class NameGrepAPIScraper {
 
   async init() {
     console.log('Launching headless browser...');
-    this.browser = await chromium.launch({
-      headless: true,
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-accelerated-2d-canvas',
-        '--no-first-run',
-        '--no-zygote',
-        '--single-process',
-        '--disable-gpu'
-      ]
-    });
+    
+    // Check if we're in a production environment (like Render)
+    const isProduction = process.env.NODE_ENV === 'production';
+    console.log('Environment:', isProduction ? 'production' : 'development');
+    
+    try {
+      this.browser = await chromium.launch({
+        headless: true,
+        args: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-accelerated-2d-canvas',
+          '--no-first-run',
+          '--no-zygote',
+          '--single-process',
+          '--disable-gpu',
+          '--disable-web-security',
+          '--disable-features=VizDisplayCompositor'
+        ]
+      });
+    } catch (error) {
+      console.error('Failed to launch browser:', error.message);
+      
+      if (isProduction && error.message.includes('Executable doesn\'t exist')) {
+        console.log('Attempting to install Playwright browsers...');
+        const { execSync } = require('child_process');
+        try {
+          execSync('npx playwright install chromium', { stdio: 'inherit' });
+          console.log('Retrying browser launch after installation...');
+          this.browser = await chromium.launch({
+            headless: true,
+            args: [
+              '--no-sandbox',
+              '--disable-setuid-sandbox',
+              '--disable-dev-shm-usage',
+              '--disable-accelerated-2d-canvas',
+              '--no-first-run',
+              '--no-zygote',
+              '--single-process',
+              '--disable-gpu',
+              '--disable-web-security',
+              '--disable-features=VizDisplayCompositor'
+            ]
+          });
+        } catch (installError) {
+          console.error('Failed to install Playwright browsers:', installError.message);
+          throw new Error('Playwright browser installation failed. Please ensure browsers are installed during build process.');
+        }
+      } else {
+        throw error;
+      }
+    }
     
     const context = await this.browser.newContext({
       userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
