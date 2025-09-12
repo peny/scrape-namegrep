@@ -75,6 +75,75 @@ class NameGrepAPIScraper {
     this.page.on('pageerror', error => console.log('PAGE ERROR:', error.message));
   }
 
+  async scrollToLoadAllResults() {
+    console.log('Starting scroll-based lazy loading...');
+    
+    let previousHeight = 0;
+    let currentHeight = 0;
+    let scrollAttempts = 0;
+    const maxScrollAttempts = 20;
+    const scrollDelay = 2000;
+    
+    do {
+      // Get current page height
+      previousHeight = currentHeight;
+      currentHeight = await this.page.evaluate(() => {
+        return Math.max(
+          document.body.scrollHeight,
+          document.body.offsetHeight,
+          document.documentElement.clientHeight,
+          document.documentElement.scrollHeight,
+          document.documentElement.offsetHeight
+        );
+      });
+      
+      console.log(`Scroll attempt ${scrollAttempts + 1}: Height ${previousHeight} -> ${currentHeight}`);
+      
+      // Scroll to bottom of page
+      await this.page.evaluate(() => {
+        window.scrollTo(0, document.body.scrollHeight);
+      });
+      
+      // Wait for new content to load
+      await this.page.waitForTimeout(scrollDelay);
+      
+      // Try to trigger any lazy loading mechanisms
+      await this.page.evaluate(() => {
+        // Dispatch scroll event
+        window.dispatchEvent(new Event('scroll'));
+        window.dispatchEvent(new Event('resize'));
+        
+        // Try to find and click any "Load More" buttons
+        const loadMoreButtons = document.querySelectorAll('button, a, div');
+        loadMoreButtons.forEach(btn => {
+          const text = btn.textContent.toLowerCase();
+          if (text.includes('load more') || text.includes('show more') || text.includes('see more')) {
+            console.log('Found load more button:', text);
+            btn.click();
+          }
+        });
+      });
+      
+      // Wait a bit more for any new content
+      await this.page.waitForTimeout(scrollDelay);
+      
+      scrollAttempts++;
+      
+      // Check if we have new content by counting domain elements
+      const domainCount = await this.page.evaluate(() => {
+        return document.querySelectorAll('.domain').length;
+      });
+      
+      console.log(`Found ${domainCount} domain elements after scroll ${scrollAttempts}`);
+      
+    } while (currentHeight > previousHeight && scrollAttempts < maxScrollAttempts);
+    
+    console.log(`Scrolling completed after ${scrollAttempts} attempts`);
+    
+    // Final wait for any remaining content to load
+    await this.page.waitForTimeout(3000);
+  }
+
   async scrapeAvailableComDomains(regexPattern) {
     try {
       console.log(`Searching for available .com domains matching pattern: ${regexPattern}`);
@@ -119,6 +188,10 @@ class NameGrepAPIScraper {
       
       // Wait for any dynamic content to load
       await this.page.waitForTimeout(3000);
+      
+      // Implement scrolling to load all results (lazy loading)
+      console.log('Implementing scrolling to load all results...');
+      await this.scrollToLoadAllResults();
 
       // Debug: Take a screenshot and get page content
       await this.page.screenshot({ path: 'api-debug.png', fullPage: true });
@@ -166,25 +239,34 @@ class NameGrepAPIScraper {
         const domainElements = document.querySelectorAll('.domain');
         console.log(`Found ${domainElements.length} domain elements`);
         
-        // Process only first 10 domain elements to avoid too much output
-        const elementsToProcess = Array.from(domainElements).slice(0, 10);
-        console.log(`Processing first ${elementsToProcess.length} domain elements`);
+        // Process ALL domain elements (not just first 10)
+        const elementsToProcess = Array.from(domainElements);
+        console.log(`Processing all ${elementsToProcess.length} domain elements`);
         
         elementsToProcess.forEach((element, index) => {
           const text = element.textContent.trim();
-          console.log(`Domain element ${index}:`, text);
+          
+          // Only log details for first few elements to avoid spam
+          if (index < 5) {
+            console.log(`Domain element ${index}:`, text);
+          }
           
           if (text && text.length > 1) {
             // Extract just the domain name part (before any TLD info)
             const lines = text.split('\n');
             const firstLine = lines[0].trim();
             
-            console.log(`First line of element ${index}:`, firstLine);
+            if (index < 5) {
+              console.log(`First line of element ${index}:`, firstLine);
+            }
             
             // Check if this looks like a domain name (without TLD)
             if (firstLine.match(/^[a-zA-Z0-9][a-zA-Z0-9.-]*$/)) {
               const cleanDomain = firstLine.toLowerCase();
-              console.log(`Clean domain: ${cleanDomain}`);
+              
+              if (index < 5) {
+                console.log(`Clean domain: ${cleanDomain}`);
+              }
               
               // Filter out common false positives
               if (!cleanDomain.includes('namegrep') && 
@@ -203,14 +285,18 @@ class NameGrepAPIScraper {
                 // Add .com suffix to create full domain
                 const fullDomain = cleanDomain + '.com';
                 domains.push(fullDomain);
-                console.log('Added domain:', fullDomain);
-              } else {
+                
+                // Log every 10th domain to track progress
+                if (domains.length % 10 === 0 || domains.length < 10) {
+                  console.log(`Added domain #${domains.length}:`, fullDomain);
+                }
+              } else if (index < 5) {
                 console.log(`Filtered out domain: ${cleanDomain}`);
               }
-            } else {
+            } else if (index < 5) {
               console.log(`First line doesn't match domain pattern: ${firstLine}`);
             }
-          } else {
+          } else if (index < 5) {
             console.log(`Element ${index} has no text or too short`);
           }
         });
