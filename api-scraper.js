@@ -26,7 +26,18 @@ class NameGrepAPIScraper {
           '--single-process',
           '--disable-gpu',
           '--disable-web-security',
-          '--disable-features=VizDisplayCompositor'
+          '--disable-features=VizDisplayCompositor',
+          '--memory-pressure-off',
+          '--max_old_space_size=512',
+          '--disable-background-timer-throttling',
+          '--disable-backgrounding-occluded-windows',
+          '--disable-renderer-backgrounding',
+          '--disable-background-networking',
+          '--disable-extensions',
+          '--disable-plugins',
+          '--disable-images',
+          '--disable-javascript-harmony-shipping',
+          '--disable-back-forward-cache'
         ]
       });
     } catch (error) {
@@ -81,8 +92,8 @@ class NameGrepAPIScraper {
     let previousHeight = 0;
     let currentHeight = 0;
     let scrollAttempts = 0;
-    const maxScrollAttempts = 20;
-    const scrollDelay = 2000;
+    const maxScrollAttempts = 10; // Reduced from 20 to save memory
+    const scrollDelay = 1500; // Reduced from 2000ms
     
     do {
       // Get current page height
@@ -193,29 +204,35 @@ class NameGrepAPIScraper {
       console.log('Implementing scrolling to load all results...');
       await this.scrollToLoadAllResults();
 
-      // Debug: Take a screenshot and get page content
-      await this.page.screenshot({ path: 'api-debug.png', fullPage: true });
-      console.log('API debug screenshot saved as api-debug.png');
+      // Debug: Get page content (skip screenshot to avoid memory issues)
+      console.log('Getting page content for debugging...');
       
-      // Get page content for debugging
-      const pageContent = await this.page.content();
-      console.log('Page content length:', pageContent.length);
-      
-      // Check what's actually on the page
-      const pageInfo = await this.page.evaluate(() => {
-        return {
-          title: document.title,
-          url: window.location.href,
-          bodyText: document.body.textContent.substring(0, 1000),
-          allLinks: Array.from(document.querySelectorAll('a')).map(a => a.href).slice(0, 10),
-          allText: document.body.textContent
-        };
-      });
-      
-      console.log('Page info:', pageInfo);
+      let pageInfo = null;
+      try {
+        // Get page content for debugging
+        const pageContent = await this.page.content();
+        console.log('Page content length:', pageContent.length);
+        
+        // Check what's actually on the page
+        pageInfo = await this.page.evaluate(() => {
+          return {
+            title: document.title,
+            url: window.location.href,
+            bodyText: document.body.textContent.substring(0, 1000),
+            domainCount: document.querySelectorAll('.domain').length
+          };
+        });
+        
+        console.log('Page info:', pageInfo);
+      } catch (debugError) {
+        console.log('Debug info collection failed (browser may be closing):', debugError.message);
+        // Continue with domain extraction even if debug fails
+      }
       
       // Extract available .com domains from the results
-      const availableComDomains = await this.page.evaluate((pattern) => {
+      let availableComDomains = [];
+      try {
+        availableComDomains = await this.page.evaluate((pattern) => {
         const domains = [];
         
         // First, let's see what's actually on the page
@@ -377,9 +394,14 @@ class NameGrepAPIScraper {
         console.log('Final unique domains:', uniqueDomains);
         
         return uniqueDomains;
-      }, regexPattern);
-
-      console.log(`Found ${availableComDomains.length} available .com domains`);
+        }, regexPattern);
+        
+        console.log(`Found ${availableComDomains.length} available .com domains`);
+      } catch (extractError) {
+        console.log('Domain extraction failed (browser may be closing):', extractError.message);
+        availableComDomains = [];
+      }
+      
       return availableComDomains;
 
     } catch (error) {
