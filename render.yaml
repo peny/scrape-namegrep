@@ -3,7 +3,7 @@ services:
     name: scrape-namegrep-api
     env: node
     nodeVersion: 20
-    buildCommand: npm install && npx playwright install chromium
+    buildCommand: ./build.sh
     startCommand: npm run start:api
     envVars:
       - key: NODE_ENV

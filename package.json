@@ -8,14 +8,15 @@
     "start": "node check-browser.js",
     "start:api": "node api-only-check-browser.js",
     "start:frontend": "npx serve public -l 3000",
-    "build": "npm install",
+    "build": "npm install && npm run install-browsers",
     "heroku-postbuild": "npm run install-browsers",
     "test": "node scraper-backup.js",
     "api": "node api.js",
     "dev": "node api.js",
     "scraper": "node scraper-backup.js",
-    "postinstall": "npx playwright install chromium",
-    "install-browsers": "npx playwright install chromium"
+    "postinstall": "echo 'Installing Playwright browsers...' && npx playwright install chromium && echo 'Browser installation completed!'",
+    "install-browsers": "npx playwright install chromium",
+    "prestart": "echo 'Pre-start: Checking browser installation...' && npx playwright install chromium"
   },
   "keywords": ["scraper", "puppeteer", "namegrep", "domains"],
   "author": "",
