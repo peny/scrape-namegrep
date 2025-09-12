@@ -314,6 +314,14 @@ body {
     transform: translateY(0);
 }
 
+.share-button {
+    background: #9f7aea !important;
+}
+
+.share-button:hover {
+    background: #805ad5 !important;
+}
+
 /* Error section */
 .error-section {
     background: rgba(254, 226, 226, 0.95);
