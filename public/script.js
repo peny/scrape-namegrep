@@ -11,6 +11,8 @@ class DomainSearch {
         this.countDisplay = document.getElementById('countDisplay');
         this.copyButton = document.getElementById('copyButton');
         this.downloadButton = document.getElementById('downloadButton');
+        this.copyButtonTop = document.getElementById('copyButtonTop');
+        this.downloadButtonTop = document.getElementById('downloadButtonTop');
         this.errorMessage = document.getElementById('errorMessage');
         
         // API URL - point to the separate API service
@@ -24,6 +26,8 @@ class DomainSearch {
         this.searchForm.addEventListener('submit', (e) => this.handleSearch(e));
         this.copyButton.addEventListener('click', () => this.copyResults());
         this.downloadButton.addEventListener('click', () => this.downloadResults());
+        this.copyButtonTop.addEventListener('click', () => this.copyResults());
+        this.downloadButtonTop.addEventListener('click', () => this.downloadResults());
     }
 
     async handleSearch(e) {

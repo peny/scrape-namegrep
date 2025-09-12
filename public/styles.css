@@ -248,6 +248,16 @@ body {
     display: flex;
     gap: 15px;
     flex-wrap: wrap;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+.results-actions-top {
+    margin-bottom: 30px;
+}
+
+.results-actions-bottom {
+    margin-top: 30px;
 }
 
 .action-button {
