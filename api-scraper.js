@@ -87,13 +87,14 @@ class NameGrepAPIScraper {
   }
 
   async scrollToLoadAllResults() {
-    console.log('Starting scroll-based lazy loading...');
+    console.log('Starting enhanced scroll-based lazy loading...');
     
     let previousHeight = 0;
     let currentHeight = 0;
     let scrollAttempts = 0;
-    const maxScrollAttempts = 10; // Reduced from 20 to save memory
-    const scrollDelay = 1500; // Reduced from 2000ms
+    const maxScrollAttempts = 15; // Increased for better results
+    const scrollDelay = 2000; // Increased for better loading
+    let stableCount = 0; // Track when domain count stabilizes
     
     do {
       // Get current page height
@@ -110,29 +111,65 @@ class NameGrepAPIScraper {
       
       console.log(`Scroll attempt ${scrollAttempts + 1}: Height ${previousHeight} -> ${currentHeight}`);
       
-      // Scroll to bottom of page
+      // Multiple scroll strategies
       await this.page.evaluate(() => {
+        // Strategy 1: Scroll to bottom
         window.scrollTo(0, document.body.scrollHeight);
+        
+        // Strategy 2: Smooth scroll
+        window.scrollTo({
+          top: document.body.scrollHeight,
+          behavior: 'smooth'
+        });
+        
+        // Strategy 3: Scroll in increments
+        for (let i = 0; i < 5; i++) {
+          setTimeout(() => {
+            window.scrollBy(0, window.innerHeight);
+          }, i * 200);
+        }
       });
       
       // Wait for new content to load
       await this.page.waitForTimeout(scrollDelay);
       
-      // Try to trigger any lazy loading mechanisms
+      // Enhanced lazy loading trigger
       await this.page.evaluate(() => {
-        // Dispatch scroll event
+        // Dispatch multiple events
         window.dispatchEvent(new Event('scroll'));
         window.dispatchEvent(new Event('resize'));
+        window.dispatchEvent(new Event('hashchange'));
+        window.dispatchEvent(new Event('load'));
         
-        // Try to find and click any "Load More" buttons
-        const loadMoreButtons = document.querySelectorAll('button, a, div');
-        loadMoreButtons.forEach(btn => {
-          const text = btn.textContent.toLowerCase();
-          if (text.includes('load more') || text.includes('show more') || text.includes('see more')) {
-            console.log('Found load more button:', text);
-            btn.click();
-          }
+        // Try to find and click any "Load More" buttons with more variations
+        const loadMoreSelectors = [
+          'button', 'a', 'div', '[class*="load"]', '[class*="more"]', 
+          '[id*="load"]', '[id*="more"]', '.btn', '.button'
+        ];
+        
+        loadMoreSelectors.forEach(selector => {
+          const elements = document.querySelectorAll(selector);
+          elements.forEach(btn => {
+            const text = btn.textContent.toLowerCase();
+            if (text.includes('load more') || text.includes('show more') || 
+                text.includes('see more') || text.includes('load') || 
+                text.includes('more') || text.includes('next')) {
+              console.log('Found load more button:', text);
+              try {
+                btn.click();
+              } catch (e) {
+                console.log('Could not click button:', e.message);
+              }
+            }
+          });
         });
+        
+        // Try to trigger infinite scroll by scrolling to specific elements
+        const domainElements = document.querySelectorAll('.domain');
+        if (domainElements.length > 0) {
+          const lastDomain = domainElements[domainElements.length - 1];
+          lastDomain.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        }
       });
       
       // Wait a bit more for any new content
@@ -147,9 +184,30 @@ class NameGrepAPIScraper {
       
       console.log(`Found ${domainCount} domain elements after scroll ${scrollAttempts}`);
       
-    } while (currentHeight > previousHeight && scrollAttempts < maxScrollAttempts);
+      // Check if domain count is stabilizing
+      if (domainCount === previousHeight) {
+        stableCount++;
+        if (stableCount >= 3) {
+          console.log('Domain count stabilized, stopping scroll');
+          break;
+        }
+      } else {
+        stableCount = 0;
+      }
+      
+    } while (scrollAttempts < maxScrollAttempts);
     
     console.log(`Scrolling completed after ${scrollAttempts} attempts`);
+    
+    // Check if we hit the 50k limit
+    const hasLimitMessage = await this.page.evaluate(() => {
+      return document.body.textContent.includes('generates over') && 
+             document.body.textContent.includes('keep it under 50,000');
+    });
+    
+    if (hasLimitMessage) {
+      console.log('⚠️  Query exceeded 50,000 match limit - try a more specific pattern');
+    }
     
     // Final wait for any remaining content to load
     await this.page.waitForTimeout(3000);
