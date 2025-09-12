@@ -13,6 +13,8 @@ class DomainSearch {
         this.downloadButton = document.getElementById('downloadButton');
         this.copyButtonTop = document.getElementById('copyButtonTop');
         this.downloadButtonTop = document.getElementById('downloadButtonTop');
+        this.shareButton = document.getElementById('shareButton');
+        this.shareButtonTop = document.getElementById('shareButtonTop');
         this.examplesButton = document.getElementById('examplesButton');
         this.errorMessage = document.getElementById('errorMessage');
         
@@ -20,6 +22,7 @@ class DomainSearch {
         this.apiUrl = 'https://scrape-namegrep-api.onrender.com';
         
         this.currentDomains = [];
+        this.currentPattern = '';
         this.init();
     }
 
@@ -29,7 +32,12 @@ class DomainSearch {
         this.downloadButton.addEventListener('click', () => this.downloadResults());
         this.copyButtonTop.addEventListener('click', () => this.copyResults());
         this.downloadButtonTop.addEventListener('click', () => this.downloadResults());
+        this.shareButton?.addEventListener('click', () => this.shareResults());
+        this.shareButtonTop?.addEventListener('click', () => this.shareResults());
         this.examplesButton.addEventListener('click', () => this.showExamples());
+        
+        // Check for hash on page load
+        this.checkHashOnLoad();
     }
 
     async handleSearch(e) {
@@ -42,6 +50,14 @@ class DomainSearch {
             return;
         }
 
+        // Store current pattern for sharing
+        this.currentPattern = regexPattern;
+        
+        // Translate user-friendly patterns to NameGrep syntax
+        const translatedPattern = this.translateRegexPattern(regexPattern);
+        console.log(`Original pattern: ${regexPattern}`);
+        console.log(`Translated pattern: ${translatedPattern}`);
+
         this.setLoading(true);
         this.hideResults();
         this.hideError();
@@ -52,7 +68,7 @@ class DomainSearch {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ regexPattern })
+                body: JSON.stringify({ regexPattern: translatedPattern })
             });
 
             const data = await response.json();
@@ -60,6 +76,8 @@ class DomainSearch {
             if (data.success) {
                 this.currentDomains = data.domains;
                 this.showResults(data);
+                // Update URL hash for sharing
+                this.updateUrlHash(this.currentPattern);
             } else {
                 this.showError(data.message || 'Failed to search domains');
             }
@@ -236,7 +254,9 @@ class DomainSearch {
 
     showExamples() {
         const examples = [
+            '(konsonant)(vokal)(konsonant)are',
             '^pe[a-zA-Z]{2,3}a$',
+            '(konsonant)(vokal)(konsonant)(vokal)',
             '^[a-zA-Z]{1,2}pola$',
             '^sk[a-zA-Z]{2,3}a$',
             '^(:astronomy/planets:).$'
@@ -246,6 +266,111 @@ class DomainSearch {
         const randomExample = examples[Math.floor(Math.random() * examples.length)];
         input.value = randomExample;
         input.focus();
+    }
+
+    // Translate user-friendly regex patterns to NameGrep syntax
+    translateRegexPattern(pattern) {
+        // Replace (konsonant) with (:alphabet/letters/consonants:)
+        pattern = pattern.replace(/\(konsonant\)/gi, '(:alphabet/letters/consonants:)');
+        
+        // Replace (vokal) with (:alphabet/letters/vowels:)
+        pattern = pattern.replace(/\(vokal\)/gi, '(:alphabet/letters/vowels:)');
+        
+        return pattern;
+    }
+
+    // Hash functionality for sharing search results
+    checkHashOnLoad() {
+        const hash = window.location.hash;
+        if (hash && hash.startsWith('#search=')) {
+            try {
+                const encodedPattern = hash.substring(8); // Remove '#search='
+                const pattern = decodeURIComponent(encodedPattern);
+                
+                // Set the pattern in the input field
+                document.getElementById('regexPattern').value = pattern;
+                
+                // Automatically trigger search
+                this.handleSearchFromHash(pattern);
+            } catch (error) {
+                console.error('Error parsing hash:', error);
+            }
+        }
+    }
+
+    async handleSearchFromHash(pattern) {
+        this.currentPattern = pattern;
+        
+        // Translate user-friendly patterns to NameGrep syntax
+        const translatedPattern = this.translateRegexPattern(pattern);
+        console.log(`Hash pattern - Original: ${pattern}, Translated: ${translatedPattern}`);
+        
+        this.setLoading(true);
+        this.hideResults();
+        this.hideError();
+
+        try {
+            const response = await fetch(`${this.apiUrl}/api/search-domains`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ regexPattern: translatedPattern })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                this.currentDomains = data.domains;
+                this.showResults(data);
+            } else {
+                this.showError(data.message || 'Failed to search domains');
+            }
+        } catch (error) {
+            console.error('Search error:', error);
+            this.showError('Network error: Unable to connect to the server');
+        } finally {
+            this.setLoading(false);
+        }
+    }
+
+    shareResults() {
+        if (!this.currentPattern || this.currentDomains.length === 0) {
+            this.showNotification('No search results to share');
+            return;
+        }
+
+        try {
+            // Create shareable URL with hash
+            const encodedPattern = encodeURIComponent(this.currentPattern);
+            const shareUrl = `${window.location.origin}${window.location.pathname}#search=${encodedPattern}`;
+            
+            // Copy to clipboard
+            navigator.clipboard.writeText(shareUrl).then(() => {
+                this.showNotification(`🔗 Share link copied! ${this.currentDomains.length} domains for "${this.currentPattern}"`);
+            }).catch(() => {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = shareUrl;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                this.showNotification(`🔗 Share link copied! ${this.currentDomains.length} domains for "${this.currentPattern}"`);
+            });
+        } catch (error) {
+            console.error('Error sharing results:', error);
+            this.showNotification('Error creating share link');
+        }
+    }
+
+    updateUrlHash(pattern) {
+        if (pattern) {
+            const encodedPattern = encodeURIComponent(pattern);
+            window.history.replaceState(null, null, `#search=${encodedPattern}`);
+        } else {
+            window.history.replaceState(null, null, window.location.pathname);
+        }
     }
 }
 

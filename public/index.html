@@ -23,12 +23,12 @@
                         id="regexPattern" 
                         name="regexPattern" 
                         class="search-input"
-                        placeholder="Enter regex pattern (e.g., ^pe[a-zA-Z]{2,3}a$)"
-                        value="^pe[a-zA-Z]{2,3}a$"
+                        placeholder="Enter regex pattern (e.g., (konsonant)(vokal)(konsonant)are)"
+                        value="(konsonant)(vokal)(konsonant)are"
                         required
                     >
                     <div class="input-help">
-                        <small>Use regex syntax. Example: <code>^pe[a-zA-Z]{2,3}a$</code> finds domains starting with "pe", followed by 2-3 letters, ending with "a"</small>
+                        <small>Use regex syntax or friendly patterns. Example: <code>(konsonant)(vokal)(konsonant)are</code> finds domains with consonant-vowel-consonant followed by "are"</small>
                     </div>
                 </div>
                 
@@ -55,6 +55,7 @@
                 <div class="results-actions results-actions-top">
                     <button class="action-button" id="copyButtonTop">📋 Copy Results</button>
                     <button class="action-button" id="downloadButtonTop">💾 Download as TXT</button>
+                    <button class="action-button share-button" id="shareButtonTop">🔗 Share Results</button>
                 </div>
                 
                 <div class="domains-container">
@@ -64,6 +65,7 @@
                 <div class="results-actions results-actions-bottom">
                     <button class="action-button" id="copyButton">📋 Copy Results</button>
                     <button class="action-button" id="downloadButton">💾 Download as TXT</button>
+                    <button class="action-button share-button" id="shareButton">🔗 Share Results</button>
                 </div>
             </div>
 
