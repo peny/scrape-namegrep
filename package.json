@@ -6,7 +6,7 @@
   "homepage": "https://github.com/peny/scrape-namegrep",
   "scripts": {
     "start": "node check-browser.js",
-    "start:api": "node api-only.js",
+    "start:api": "node api-only-check-browser.js",
     "start:frontend": "npx serve public -l 3000",
     "build": "npm install",
     "heroku-postbuild": "npm run install-browsers",

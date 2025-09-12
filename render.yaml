@@ -1,10 +1,10 @@
 services:
   - type: web
-    name: namegrep-scraper
+    name: scrape-namegrep-api
     env: node
     nodeVersion: 20
     buildCommand: npm install && npx playwright install chromium
-           startCommand: node check-browser.js
+    startCommand: npm run start:api
     envVars:
       - key: NODE_ENV
         value: production
