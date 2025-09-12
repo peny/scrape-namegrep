@@ -7,7 +7,7 @@
 
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #d97706 0%, #b45309 25%, #92400e 75%, #451a03 100%);
     min-height: 100vh;
     color: #333;
     line-height: 1.6;
@@ -120,7 +120,7 @@ body {
 .search-button {
     flex: 1;
     padding: 18px 24px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #ea580c 0%, #dc2626 100%);
     color: white;
     border: none;
     border-radius: 12px;
@@ -160,7 +160,7 @@ body {
 
 .search-button:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 8px 25px rgba(234, 88, 12, 0.4);
 }
 
 .search-button:active {
