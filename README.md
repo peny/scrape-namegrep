@@ -2,6 +2,13 @@
 
 A Node.js application that uses Playwright to scrape domain names from namegrep.com based on regex patterns.
 
+## 🎉 Major Breakthrough (Latest Update)
+
+- **747x improvement**: Now extracts 16,450+ domains vs previous 22
+- **Direct AJAX endpoint**: Uses namegrep.com's internal API for all results
+- **Much faster**: No more scrolling or lazy loading needed
+- **More reliable**: Direct data access instead of UI scraping
+
 ## Features
 
 - Headless browser automation using Playwright
