@@ -217,6 +217,31 @@ class NameGrepAPIScraper {
     try {
       console.log(`Searching for available .com domains matching pattern: ${regexPattern}`);
       
+      // Set up network monitoring
+      const networkRequests = [];
+      const networkResponses = [];
+      
+      this.page.on('request', request => {
+        if (request.url().includes('namegrep') || request.url().includes('api')) {
+          networkRequests.push({
+            url: request.url(),
+            method: request.method(),
+            headers: request.headers(),
+            postData: request.postData()
+          });
+        }
+      });
+      
+      this.page.on('response', response => {
+        if (response.url().includes('namegrep') || response.url().includes('api')) {
+          networkResponses.push({
+            url: response.url(),
+            status: response.status(),
+            headers: response.headers()
+          });
+        }
+      });
+      
       // Navigate to namegrep.com
       await this.page.goto('https://namegrep.com', {
         waitUntil: 'networkidle',
@@ -224,6 +249,8 @@ class NameGrepAPIScraper {
       });
 
       console.log('Page loaded successfully');
+      console.log(`Network requests during page load: ${networkRequests.length}`);
+      console.log(`Network responses during page load: ${networkResponses.length}`);
 
       // Wait for the search input field to be available
       await this.page.waitForSelector('#query', { timeout: 10000 });
@@ -237,17 +264,73 @@ class NameGrepAPIScraper {
 
       // Submit the form
       console.log('Submitting form...');
+      const requestsBeforeSubmit = networkRequests.length;
+      
       await this.page.evaluate(() => {
         const form = document.getElementById('search');
         if (form) {
           form.submit();
         }
       });
+      
+      console.log(`Network requests before submit: ${requestsBeforeSubmit}`);
 
       console.log('Search submitted, waiting for results...');
 
-      // Wait for results to load
-      await this.page.waitForTimeout(8000);
+      // Wait for AJAX response
+      await this.page.waitForResponse(response => 
+        response.url().includes('/ajax?query=') && response.status() === 200
+      );
+      
+      console.log('AJAX response received!');
+      
+      // Get the AJAX response directly
+      const ajaxResponse = await this.page.evaluate(async (pattern) => {
+        try {
+          const encodedQuery = encodeURIComponent(pattern);
+          const response = await fetch(`/ajax?query=${encodedQuery}`);
+          const data = await response.text();
+          return data;
+        } catch (error) {
+          console.log('Direct AJAX call failed:', error.message);
+          return null;
+        }
+      }, regexPattern);
+      
+      if (ajaxResponse) {
+        console.log('Direct AJAX response length:', ajaxResponse.length);
+        console.log('First 500 chars of AJAX response:', ajaxResponse.substring(0, 500));
+        
+        // Parse the JSON response
+        try {
+          const jsonData = JSON.parse(ajaxResponse);
+          console.log('Parsed JSON data keys:', Object.keys(jsonData));
+          
+          if (jsonData.domains && Array.isArray(jsonData.domains)) {
+            console.log('AJAX returned domains array with length:', jsonData.domains.length);
+            const availableDomains = jsonData.domains
+              .filter(item => item.id && !item.mask) // Filter for available domains (no mask)
+              .map(item => item.id + '.com');
+            
+            console.log(`Found ${availableDomains.length} available domains from AJAX`);
+            return availableDomains;
+          } else if (Array.isArray(jsonData)) {
+            console.log('AJAX returned array with length:', jsonData.length);
+            const availableDomains = jsonData
+              .filter(item => item.id && !item.mask) // Filter for available domains (no mask)
+              .map(item => item.id + '.com');
+            
+            console.log(`Found ${availableDomains.length} available domains from AJAX`);
+            return availableDomains;
+          }
+        } catch (parseError) {
+          console.log('Failed to parse AJAX JSON:', parseError.message);
+        }
+      }
+      
+      // Log network activity after initial wait
+      console.log(`Network requests after initial wait: ${networkRequests.length}`);
+      console.log(`Network responses after initial wait: ${networkResponses.length}`);
       
       // Try to trigger any JavaScript that might load results
       await this.page.evaluate(() => {
@@ -258,9 +341,61 @@ class NameGrepAPIScraper {
       // Wait for any dynamic content to load
       await this.page.waitForTimeout(3000);
       
+      // Log network activity after JS triggers
+      console.log(`Network requests after JS triggers: ${networkRequests.length}`);
+      console.log(`Network responses after JS triggers: ${networkResponses.length}`);
+      
       // Implement scrolling to load all results (lazy loading)
       console.log('Implementing scrolling to load all results...');
+      const requestsBeforeScroll = networkRequests.length;
       await this.scrollToLoadAllResults();
+      
+      // Log network activity after scrolling
+      console.log(`Network requests after scrolling: ${networkRequests.length}`);
+      console.log(`Network responses after scrolling: ${networkResponses.length}`);
+      console.log(`New requests during scroll: ${networkRequests.length - requestsBeforeScroll}`);
+      
+      // Detailed DOM analysis
+      const domAnalysis = await this.page.evaluate(() => {
+        const domainElements = document.querySelectorAll('.domain');
+        const allElements = document.querySelectorAll('*');
+        const scripts = document.querySelectorAll('script');
+        const links = document.querySelectorAll('link');
+        
+        // Check for any hidden elements or containers
+        const hiddenElements = Array.from(document.querySelectorAll('*')).filter(el => {
+          const style = window.getComputedStyle(el);
+          return style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0';
+        });
+        
+        // Check for any elements with data attributes that might indicate pagination
+        const allElementsWithData = Array.from(document.querySelectorAll('*')).filter(el => {
+          return Array.from(el.attributes).some(attr => attr.name.startsWith('data-'));
+        });
+        const dataElements = allElementsWithData.map(el => {
+          const attrs = {};
+          for (let attr of el.attributes) {
+            if (attr.name.startsWith('data-')) {
+              attrs[attr.name] = attr.value;
+            }
+          }
+          return { tagName: el.tagName, className: el.className, attrs };
+        });
+        
+        return {
+          totalElements: allElements.length,
+          domainElements: domainElements.length,
+          scripts: scripts.length,
+          links: links.length,
+          hiddenElements: hiddenElements.length,
+          dataElements: dataElements.slice(0, 10), // First 10 data elements
+          pageHeight: document.body.scrollHeight,
+          viewportHeight: window.innerHeight,
+          scrollTop: window.pageYOffset
+        };
+      });
+      
+      console.log('DOM Analysis:', domAnalysis);
 
       // Debug: Get page content (skip screenshot to avoid memory issues)
       console.log('Getting page content for debugging...');
@@ -459,6 +594,34 @@ class NameGrepAPIScraper {
         console.log('Domain extraction failed (browser may be closing):', extractError.message);
         availableComDomains = [];
       }
+      
+      // Final network analysis
+      console.log('\n=== NETWORK ANALYSIS SUMMARY ===');
+      console.log(`Total network requests: ${networkRequests.length}`);
+      console.log(`Total network responses: ${networkResponses.length}`);
+      
+      // Log unique request URLs
+      const uniqueUrls = [...new Set(networkRequests.map(req => req.url))];
+      console.log('Unique request URLs:', uniqueUrls);
+      
+      // Log any POST requests (might be AJAX calls for more data)
+      const postRequests = networkRequests.filter(req => req.method === 'POST');
+      if (postRequests.length > 0) {
+        console.log('POST requests found:', postRequests);
+      }
+      
+      // Log any requests with specific patterns
+      const apiRequests = networkRequests.filter(req => 
+        req.url.includes('api') || 
+        req.url.includes('search') || 
+        req.url.includes('data') ||
+        req.url.includes('load')
+      );
+      if (apiRequests.length > 0) {
+        console.log('Potential API/search requests:', apiRequests);
+      }
+      
+      console.log('=== END NETWORK ANALYSIS ===\n');
       
       return availableComDomains;
 
