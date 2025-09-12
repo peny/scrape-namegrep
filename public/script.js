@@ -13,6 +13,7 @@ class DomainSearch {
         this.downloadButton = document.getElementById('downloadButton');
         this.copyButtonTop = document.getElementById('copyButtonTop');
         this.downloadButtonTop = document.getElementById('downloadButtonTop');
+        this.examplesButton = document.getElementById('examplesButton');
         this.errorMessage = document.getElementById('errorMessage');
         
         // API URL - point to the separate API service
@@ -28,6 +29,7 @@ class DomainSearch {
         this.downloadButton.addEventListener('click', () => this.downloadResults());
         this.copyButtonTop.addEventListener('click', () => this.copyResults());
         this.downloadButtonTop.addEventListener('click', () => this.downloadResults());
+        this.examplesButton.addEventListener('click', () => this.showExamples());
     }
 
     async handleSearch(e) {
@@ -231,6 +233,20 @@ class DomainSearch {
             }, 300);
         }, 3000);
     }
+
+    showExamples() {
+        const examples = [
+            '^pe[a-zA-Z]{2,3}a$',
+            '^[a-zA-Z]{1,2}pola$',
+            '^sk[a-zA-Z]{2,3}a$',
+            '^(:astronomy/planets:).$'
+        ];
+        
+        const input = document.getElementById('regexPattern');
+        const randomExample = examples[Math.floor(Math.random() * examples.length)];
+        input.value = randomExample;
+        input.focus();
+    }
 }
 
 // Initialize the application when DOM is loaded
@@ -238,41 +254,3 @@ document.addEventListener('DOMContentLoaded', () => {
     new DomainSearch();
 });
 
-// Add some helpful regex examples
-document.addEventListener('DOMContentLoaded', () => {
-    const input = document.getElementById('regexPattern');
-    const examples = [
-        '^pr.{1,2}a$',
-        '^pe.{2,3}a$',
-        '^test.*',
-        '.*shop.*',
-        '.*app$',
-        '^[a-z]{4,6}[0-9]{2,3}$'
-    ];
-    
-    let currentExample = 0;
-    
-    // Add example button
-    const exampleButton = document.createElement('button');
-    exampleButton.type = 'button';
-    exampleButton.textContent = '📝 Examples';
-    exampleButton.className = 'example-button';
-    exampleButton.style.cssText = `
-        margin-top: 10px;
-        padding: 8px 16px;
-        background: #e2e8f0;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 0.9rem;
-        color: #4a5568;
-    `;
-    
-    exampleButton.addEventListener('click', () => {
-        input.value = examples[currentExample];
-        currentExample = (currentExample + 1) % examples.length;
-        input.focus();
-    });
-    
-    input.parentNode.appendChild(exampleButton);
-});

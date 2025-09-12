@@ -23,19 +23,24 @@
                         id="regexPattern" 
                         name="regexPattern" 
                         class="search-input"
-                        placeholder="Enter regex pattern (e.g., ^pe.{2,3}a$)"
-                        value="^pr.{1,2}a$"
+                        placeholder="Enter regex pattern (e.g., ^pe[a-zA-Z]{2,3}a$)"
+                        value="^pe[a-zA-Z]{2,3}a$"
                         required
                     >
                     <div class="input-help">
-                        <small>Use regex syntax. Example: <code>^pe.{2,3}a$</code> finds domains starting with "pe", followed by 2-3 characters, ending with "a"</small>
+                        <small>Use regex syntax. Example: <code>^pe[a-zA-Z]{2,3}a$</code> finds domains starting with "pe", followed by 2-3 letters, ending with "a"</small>
                     </div>
                 </div>
                 
-                <button type="submit" class="search-button" id="searchButton">
-                    <span class="button-text">Search Domains</span>
-                    <span class="button-spinner" id="spinner" style="display: none;">⏳</span>
-                </button>
+                <div class="button-group">
+                    <button type="submit" class="search-button" id="searchButton">
+                        <span class="button-text">Search Domains</span>
+                        <span class="button-spinner" id="spinner" style="display: none;">⏳</span>
+                    </button>
+                    <button type="button" class="examples-button" id="examplesButton">
+                        📋 Examples
+                    </button>
+                </div>
             </form>
 
             <div class="results-section" id="resultsSection" style="display: none;">
