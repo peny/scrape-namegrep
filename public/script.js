@@ -52,6 +52,11 @@ class DomainSearch {
 
         // Store current pattern for sharing
         this.currentPattern = regexPattern;
+        
+        // Translate user-friendly patterns to NameGrep syntax
+        const translatedPattern = this.translateRegexPattern(regexPattern);
+        console.log(`Original pattern: ${regexPattern}`);
+        console.log(`Translated pattern: ${translatedPattern}`);
 
         this.setLoading(true);
         this.hideResults();
@@ -63,7 +68,7 @@ class DomainSearch {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ regexPattern })
+                body: JSON.stringify({ regexPattern: translatedPattern })
             });
 
             const data = await response.json();
@@ -249,7 +254,9 @@ class DomainSearch {
 
     showExamples() {
         const examples = [
+            '(konsonant)(vokal)(konsonant)are',
             '^pe[a-zA-Z]{2,3}a$',
+            '(konsonant)(vokal)(konsonant)(vokal)',
             '^[a-zA-Z]{1,2}pola$',
             '^sk[a-zA-Z]{2,3}a$',
             '^(:astronomy/planets:).$'
@@ -259,6 +266,17 @@ class DomainSearch {
         const randomExample = examples[Math.floor(Math.random() * examples.length)];
         input.value = randomExample;
         input.focus();
+    }
+
+    // Translate user-friendly regex patterns to NameGrep syntax
+    translateRegexPattern(pattern) {
+        // Replace (konsonant) with (:alphabet/letters/consonants:)
+        pattern = pattern.replace(/\(konsonant\)/gi, '(:alphabet/letters/consonants:)');
+        
+        // Replace (vokal) with (:alphabet/letters/vowels:)
+        pattern = pattern.replace(/\(vokal\)/gi, '(:alphabet/letters/vowels:)');
+        
+        return pattern;
     }
 
     // Hash functionality for sharing search results
@@ -282,6 +300,11 @@ class DomainSearch {
 
     async handleSearchFromHash(pattern) {
         this.currentPattern = pattern;
+        
+        // Translate user-friendly patterns to NameGrep syntax
+        const translatedPattern = this.translateRegexPattern(pattern);
+        console.log(`Hash pattern - Original: ${pattern}, Translated: ${translatedPattern}`);
+        
         this.setLoading(true);
         this.hideResults();
         this.hideError();
@@ -292,7 +315,7 @@ class DomainSearch {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ regexPattern: pattern })
+                body: JSON.stringify({ regexPattern: translatedPattern })
             });
 
             const data = await response.json();
