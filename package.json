@@ -6,6 +6,8 @@
   "homepage": "https://github.com/peny/scrape-namegrep",
   "scripts": {
     "start": "node check-browser.js",
+    "start:api": "node api-only.js",
+    "start:frontend": "npx serve public -l 3000",
     "build": "npm install",
     "heroku-postbuild": "npm run install-browsers",
     "test": "node scraper-backup.js",
@@ -21,7 +23,8 @@
   "dependencies": {
     "playwright": "^1.40.0",
     "express": "^4.18.2",
-    "cors": "^2.8.5"
+    "cors": "^2.8.5",
+    "serve": "^14.2.1"
   },
   "devDependencies": {
     "@playwright/test": "^1.40.0"

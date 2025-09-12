@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: scrape-namegrep-frontend
+    env: node
+    nodeVersion: 20
+    buildCommand: npm install
+    startCommand: npm run start:frontend
+    envVars:
+      - key: NODE_ENV
+        value: production

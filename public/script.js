@@ -13,6 +13,9 @@ class DomainSearch {
         this.downloadButton = document.getElementById('downloadButton');
         this.errorMessage = document.getElementById('errorMessage');
         
+        // API URL - point to the separate API service
+        this.apiUrl = 'https://scrape-namegrep-api.onrender.com';
+        
         this.currentDomains = [];
         this.init();
     }
@@ -38,7 +41,7 @@ class DomainSearch {
         this.hideError();
 
         try {
-            const response = await fetch('/api/search-domains', {
+            const response = await fetch(`${this.apiUrl}/api/search-domains`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
