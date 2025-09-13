@@ -74,10 +74,14 @@ class DomainSearch {
             const data = await response.json();
 
             if (data.success) {
-                this.currentDomains = data.domains;
+                // Filter to .com domains only and dedupe
+                const filteredDomains = Array.isArray(data.domains)
+                    ? [...new Set(data.domains.filter(d => typeof d === 'string' && d.toLowerCase().endsWith('.com')).map(d => d.toLowerCase()))]
+                    : [];
+                this.currentDomains = filteredDomains;
                 
-                // Check if we got any domains back
-                if (!data.domains || data.domains.length === 0) {
+                // Check if we got any .com domains back
+                if (!filteredDomains || filteredDomains.length === 0) {
                     const hasSpecialChars = /[öäåÖÄÅ]/.test(this.currentPattern);
                     const specialCharNote = hasSpecialChars ? 
                         " (Obs: Specialtecken som ö, ä, å hanteras via URL-encoding men kan ge färre resultat)" : "";
@@ -85,7 +89,7 @@ class DomainSearch {
                     return;
                 }
                 
-                this.showResults(data);
+                this.showResults({ ...data, domains: filteredDomains, count: filteredDomains.length });
                 // Update URL hash for sharing
                 this.updateUrlHash(this.currentPattern);
             } else {
@@ -335,8 +339,11 @@ class DomainSearch {
             const data = await response.json();
 
             if (data.success) {
-                this.currentDomains = data.domains;
-                this.showResults(data);
+                const filteredDomains = Array.isArray(data.domains)
+                    ? [...new Set(data.domains.filter(d => typeof d === 'string' && d.toLowerCase().endsWith('.com')).map(d => d.toLowerCase()))]
+                    : [];
+                this.currentDomains = filteredDomains;
+                this.showResults({ ...data, domains: filteredDomains, count: filteredDomains.length });
             } else {
                 this.showError(data.message || 'Failed to search domains');
             }
