@@ -306,22 +306,56 @@ class NameGrepAPIScraper {
           const jsonData = JSON.parse(ajaxResponse);
           console.log('Parsed JSON data keys:', Object.keys(jsonData));
           
-          if (jsonData.domains && Array.isArray(jsonData.domains)) {
-            console.log('AJAX returned domains array with length:', jsonData.domains.length);
-            const availableDomains = jsonData.domains
-              .filter(item => item.id && !item.mask) // Filter for available domains (no mask)
-              .map(item => item.id + '.com');
-            
-            console.log(`Found ${availableDomains.length} available domains from AJAX`);
-            return availableDomains;
-          } else if (Array.isArray(jsonData)) {
-            console.log('AJAX returned array with length:', jsonData.length);
-            const availableDomains = jsonData
-              .filter(item => item.id && !item.mask) // Filter for available domains (no mask)
-              .map(item => item.id + '.com');
-            
-            console.log(`Found ${availableDomains.length} available domains from AJAX`);
-            return availableDomains;
+          const items = Array.isArray(jsonData) ? jsonData : (Array.isArray(jsonData.domains) ? jsonData.domains : null);
+          if (items) {
+            console.log('AJAX returned items length:', items.length);
+            const extracted = [];
+            for (const item of items) {
+              // Case 1: item is a string
+              if (typeof item === 'string') {
+                if (/\.com$/i.test(item)) {
+                  extracted.push(item.toLowerCase());
+                }
+                continue;
+              }
+
+              // Case 2: item has a direct domain-like field
+              const directDomain = item.domain || item.name || item.full || item.url;
+              if (typeof directDomain === 'string' && /\.com$/i.test(directDomain)) {
+                const isAvailable = (typeof item.available === 'boolean' ? item.available : true) &&
+                                   (typeof item.mask !== 'boolean' ? true : !item.mask) &&
+                                   (typeof item.status === 'string' ? item.status.toLowerCase() !== 'unavailable' : true);
+                if (isAvailable) extracted.push(directDomain.toLowerCase());
+                continue;
+              }
+
+              // Case 3: item is a base label with TLD availability info
+              const base = item.id || item.slug || item.label;
+              const tldsObj = item.tlds || item.tldAvailability || item.availability || item.availableTlds;
+              const tldSingle = item.tld;
+
+              const comAvailable = (
+                (tldSingle && (tldSingle === 'com' || tldSingle === '.com')) ||
+                (Array.isArray(tldsObj) && tldsObj.map(t => (typeof t === 'string' ? t.replace(/^\./, '') : '')).includes('com')) ||
+                (tldsObj && typeof tldsObj === 'object' && (
+                  tldsObj['com'] === true || tldsObj['.com'] === true ||
+                  (typeof tldsObj['com'] === 'string' && tldsObj['com'].toLowerCase() === 'available') ||
+                  (typeof tldsObj['.com'] === 'string' && tldsObj['.com'].toLowerCase() === 'available')
+                ))
+              );
+
+              const notMasked = !(typeof item.mask === 'boolean' && item.mask);
+
+              if (base && comAvailable && notMasked) {
+                extracted.push(String(base).toLowerCase() + '.com');
+              }
+            }
+
+            const availableDomains = [...new Set(extracted)].filter(d => /\.com$/i.test(d));
+            console.log(`Found ${availableDomains.length} available .com domains from AJAX`);
+            if (availableDomains.length > 0) {
+              return availableDomains;
+            }
           }
         } catch (parseError) {
           console.log('Failed to parse AJAX JSON:', parseError.message);
@@ -422,7 +456,7 @@ class NameGrepAPIScraper {
         // Continue with domain extraction even if debug fails
       }
       
-      // Extract available .com domains from the results
+      // Extract available .com domains from the results (fallback-only, if AJAX fails)
       let availableComDomains = [];
       try {
         availableComDomains = await this.page.evaluate((pattern) => {
@@ -445,69 +479,37 @@ class NameGrepAPIScraper {
         const allElements = document.querySelectorAll('*');
         console.log('Total elements on page:', allElements.length);
         
-        // Look for domain names in .domain elements specifically
+        // Look for domain names in .domain elements specifically and only capture explicit .com mentions
         const domainElements = document.querySelectorAll('.domain');
         console.log(`Found ${domainElements.length} domain elements`);
-        
-        // Process ALL domain elements (not just first 10)
         const elementsToProcess = Array.from(domainElements);
         console.log(`Processing all ${elementsToProcess.length} domain elements`);
-        
         elementsToProcess.forEach((element, index) => {
           const text = element.textContent.trim();
-          
-          // Only log details for first few elements to avoid spam
           if (index < 5) {
             console.log(`Domain element ${index}:`, text);
           }
-          
-          if (text && text.length > 1) {
-            // Extract just the domain name part (before any TLD info)
-            const lines = text.split('\n');
-            const firstLine = lines[0].trim();
-            
-            if (index < 5) {
-              console.log(`First line of element ${index}:`, firstLine);
-            }
-            
-            // Check if this looks like a domain name (without TLD)
-            if (firstLine.match(/^[a-zA-Z0-9][a-zA-Z0-9.-]*$/)) {
-              const cleanDomain = firstLine.toLowerCase();
-              
-              if (index < 5) {
-                console.log(`Clean domain: ${cleanDomain}`);
-              }
-              
-              // Filter out common false positives
-              if (!cleanDomain.includes('namegrep') && 
-                  !cleanDomain.includes('jquery') && 
-                  !cleanDomain.includes('github') && 
-                  !cleanDomain.includes('google') && 
-                  !cleanDomain.includes('mozilla') &&
-                  !cleanDomain.includes('facebook') &&
-                  !cleanDomain.includes('twitter') &&
-                  !cleanDomain.includes('youtube') &&
-                  !cleanDomain.includes('amazon') &&
-                  !cleanDomain.includes('microsoft') &&
-                  cleanDomain.length > 1 && 
-                  cleanDomain.length < 20) {
-                
-                // Add .com suffix to create full domain
-                const fullDomain = cleanDomain + '.com';
-                domains.push(fullDomain);
-                
-                // Log every 10th domain to track progress
-                if (domains.length % 10 === 0 || domains.length < 10) {
-                  console.log(`Added domain #${domains.length}:`, fullDomain);
+          if (text) {
+            const comMatches = text.match(/\b[a-zA-Z0-9][a-zA-Z0-9.-]*\.com\b/g);
+            if (comMatches) {
+              comMatches.forEach(domain => {
+                const cleanDomain = domain.toLowerCase();
+                if (!cleanDomain.includes('namegrep') &&
+                    !cleanDomain.includes('jquery') &&
+                    !cleanDomain.includes('github') &&
+                    !cleanDomain.includes('google') &&
+                    !cleanDomain.includes('mozilla') &&
+                    !cleanDomain.includes('facebook') &&
+                    !cleanDomain.includes('twitter') &&
+                    !cleanDomain.includes('youtube') &&
+                    !cleanDomain.includes('amazon') &&
+                    !cleanDomain.includes('microsoft') &&
+                    cleanDomain.length > 4 &&
+                    cleanDomain.length < 50) {
+                  domains.push(cleanDomain);
                 }
-              } else if (index < 5) {
-                console.log(`Filtered out domain: ${cleanDomain}`);
-              }
-            } else if (index < 5) {
-              console.log(`First line doesn't match domain pattern: ${firstLine}`);
+              });
             }
-          } else if (index < 5) {
-            console.log(`Element ${index} has no text or too short`);
           }
         });
         
@@ -563,27 +565,31 @@ class NameGrepAPIScraper {
         tables.forEach((table, index) => {
           const rows = table.querySelectorAll('tr');
           console.log(`Table ${index} has ${rows.length} rows`);
-          
-          rows.forEach((row, rowIndex) => {
+          rows.forEach((row) => {
             const cells = row.querySelectorAll('td, th');
-            cells.forEach((cell, cellIndex) => {
+            cells.forEach((cell) => {
               const text = cell.textContent.trim();
-              if (text && text.match(/^[a-zA-Z0-9][a-zA-Z0-9.-]*\.[a-zA-Z]{2,}$/)) {
-                const cleanDomain = text.toLowerCase();
-                if (!cleanDomain.includes('namegrep') && 
-                    !cleanDomain.includes('jquery') && 
-                    cleanDomain.length > 4 && 
-                    cleanDomain.length < 50) {
-                  domains.push(cleanDomain);
-                  console.log('Added domain from table:', cleanDomain);
+              if (text && text.includes('.com')) {
+                const comMatches = text.match(/\b[a-zA-Z0-9][a-zA-Z0-9.-]*\.com\b/g);
+                if (comMatches) {
+                  comMatches.forEach(domain => {
+                    const cleanDomain = domain.toLowerCase();
+                    if (!cleanDomain.includes('namegrep') &&
+                        !cleanDomain.includes('jquery') &&
+                        cleanDomain.length > 4 &&
+                        cleanDomain.length < 50) {
+                      domains.push(cleanDomain);
+                      console.log('Added .com domain from table:', cleanDomain);
+                    }
+                  });
                 }
               }
             });
           });
         });
         
-        // Remove duplicates
-        const uniqueDomains = [...new Set(domains)];
+        // Remove duplicates and ensure only .com domains
+        const uniqueDomains = [...new Set(domains)].filter(d => d.endsWith('.com'));
         console.log('Final unique domains:', uniqueDomains);
         
         return uniqueDomains;
