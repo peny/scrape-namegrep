@@ -34,26 +34,6 @@ body {
     position: relative;
 }
 
-/* Memphis wave decoration */
-.container::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 100px;
-    background: linear-gradient(90deg, #ff6b9d, #c44569, #f8b500, #ff9ff3, #54a0ff);
-    background-size: 200% 100%;
-    animation: wave 3s ease-in-out infinite;
-    z-index: -1;
-    border-radius: 0 0 50% 50%;
-    transform: scaleX(1.2);
-}
-
-@keyframes wave {
-    0%, 100% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-}
 
 /* Header with Memphis styling */
 .header {
@@ -72,21 +52,6 @@ body {
     z-index: 10;
 }
 
-.header::before {
-    content: '🎯';
-    position: absolute;
-    top: -20px;
-    left: 20px;
-    font-size: 2rem;
-}
-
-.header::after {
-    content: '🌟';
-    position: absolute;
-    top: -15px;
-    right: 30px;
-    font-size: 1.5rem;
-}
 
 .header h1 {
     font-family: 'Bungee', cursive;
