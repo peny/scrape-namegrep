@@ -75,6 +75,16 @@ class DomainSearch {
 
             if (data.success) {
                 this.currentDomains = data.domains;
+                
+                // Check if we got any domains back
+                if (!data.domains || data.domains.length === 0) {
+                    const hasSpecialChars = /[öäåÖÄÅ]/.test(this.currentPattern);
+                    const specialCharNote = hasSpecialChars ? 
+                        " (Obs: Specialtecken som ö, ä, å hanteras via URL-encoding men kan ge färre resultat)" : "";
+                    this.showError(`Inga tillgängliga domäner hittades för mönstret "${this.currentPattern}". Prova ett annat mönster!${specialCharNote}`);
+                    return;
+                }
+                
                 this.showResults(data);
                 // Update URL hash for sharing
                 this.updateUrlHash(this.currentPattern);
@@ -275,6 +285,10 @@ class DomainSearch {
         
         // Replace (vokal) with (:alphabet/letters/vowels:)
         pattern = pattern.replace(/\(vokal\)/gi, '(:alphabet/letters/vowels:)');
+        
+        // Log pattern translation for debugging special characters
+        console.log(`Pattern translation: "${this.currentPattern}" → "${pattern}"`);
+        console.log(`URL encoding: "${pattern}" → "${encodeURIComponent(pattern)}"`);
         
         return pattern;
     }
