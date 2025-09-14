@@ -1,177 +1,231 @@
 # NameGrep Scraper
 
-A Node.js application that uses Playwright to scrape domain names from namegrep.com based on regex patterns.
+A Node.js application that scrapes domain names from namegrep.com using headless browser automation with Playwright. Features a beautiful Memphis design frontend with wavy borders and vibrant colors.
 
-## 🎉 Major Breakthrough (Latest Update)
+## 🎨 Features
 
-- **747x improvement**: Now extracts 16,450+ domains vs previous 22
-- **Direct AJAX endpoint**: Uses namegrep.com's internal API for all results
-- **Much faster**: No more scrolling or lazy loading needed
-- **More reliable**: Direct data access instead of UI scraping
+- **Memphis Design Frontend**: Vibrant colors, wavy borders, and playful animations
+- **Headless Browser Automation**: Uses Playwright to scrape namegrep.com
+- **Regex-based Domain Search**: Support for complex regex patterns and user-friendly syntax
+- **Interactive Web Interface**: Modern, responsive design with real-time results
+- **Domain Filtering**: Automatically filters for available .com domains
+- **Export Functionality**: Copy to clipboard or download as TXT file
+- **Share Results**: Generate shareable links with hash-based URLs
 
-## Features
+## 🚀 Quick Start
 
-- Headless browser automation using Playwright
-- Regex-based domain search
-- Extracts and filters domain names
-- Saves results to text files
-- Debug screenshot capability
-- Multiple search approaches (form submission and direct URL)
+### Installation
 
-## Installation
+1. **Clone the repository:**
+```bash
+git clone https://github.com/peny/scrape-namegrep.git
+cd scrape-namegrep
+```
 
-1. Install dependencies:
+2. **Install dependencies:**
 ```bash
 npm install
 ```
 
-2. Install Playwright browsers:
+3. **Install Playwright browsers:**
 ```bash
 npx playwright install chromium
 ```
 
-## Usage
+### Usage
 
-### 🌐 Web Frontend (Recommended)
+#### 🌐 Web Interface (Recommended)
+
+Start the full-stack application:
 ```bash
 npm run dev
 ```
-Then open http://localhost:3000 in your browser
 
-### 📡 API Server
+Then open http://localhost:3000 in your browser.
+
+#### 📡 API Only
+
+Start just the API server:
 ```bash
 npm run api
 ```
+
 API endpoint: `POST http://localhost:3000/api/search-domains`
 
-### 💻 Command Line Scrapers
+#### 💻 Command Line
+
+Run the scraper directly:
 ```bash
-# Original comprehensive scraper
-node scraper.js "your-regex-pattern"
+# Basic scraper
+node scraper-backup.js "your-regex-pattern"
 
 # Simple scraper for testing
 node simple-scraper.js "your-regex-pattern"
 ```
 
-### Examples
+## 📖 Examples
 
-#### Web Frontend
-- Open http://localhost:3000
-- Enter regex pattern: `^pe.{2,3}a$` (preloaded)
-- Click "Search Domains"
-- View results, copy to clipboard, or download as TXT
+### Web Interface
 
-#### API Usage
+1. Open http://localhost:3000
+2. Enter a regex pattern (e.g., `(konsonant)(vokal)(konsonant)are`)
+3. Click "Search Domains"
+4. View results, copy to clipboard, or download as TXT
+
+### API Usage
+
 ```bash
 curl -X POST http://localhost:3000/api/search-domains \
   -H "Content-Type: application/json" \
-  -d '{"regexPattern": "^pe.{2,3}a$"}'
+  -d '{"regexPattern": "test.*"}'
 ```
 
-#### Command Line
+### Regex Patterns
+
+The app supports both standard regex and user-friendly patterns:
+
+#### Standard Regex
 ```bash
-# Search for domains starting with "test"
-node scraper.js "test.*"
+# Domains starting with "test"
+test.*
 
-# Search for domains containing "shop"
-node scraper.js ".*shop.*"
+# Domains ending with "app"
+.*app$
 
-# Search for domains ending with "app"
-node scraper.js ".*app$"
-
-# Search for domains with specific patterns
-node scraper.js "tech.*[0-9]{3}"
+# Domains with specific patterns
+tech.*[0-9]{3}
 ```
 
-## Output
+#### User-friendly Patterns
+```bash
+# Consonant-vowel-consonant followed by "are"
+(konsonant)(vokal)(konsonant)are
 
-### Web Frontend
-- Interactive search form with regex input
-- Real-time results display with domain cards
-- Copy individual domains or all results to clipboard
-- Download results as TXT file
-- Responsive design for mobile and desktop
+# Specific letter patterns
+^pe[a-zA-Z]{2,3}a$
+```
 
-### API Response
+## 🎨 Memphis Design
+
+The frontend features a vibrant Memphis design with:
+
+- **Wavy borders** and **rounded corners**
+- **Gradient backgrounds** with animated color shifts
+- **Vibrant color palette** (pinks, blues, oranges, purples)
+- **Playful animations** and **hover effects**
+- **Responsive design** for mobile and desktop
+- **Spinning hourglass** loading animation
+
+## 📁 Project Structure
+
+```
+├── api.js                 # Express API server
+├── api-scraper.js         # Main scraper with Playwright
+├── scraper-backup.js      # Backup scraper implementation
+├── simple-scraper.js      # Simplified scraper for testing
+├── public/                # Frontend files
+│   ├── index.html         # Main HTML page
+│   ├── styles.css         # Memphis design CSS
+│   └── script.js          # Frontend JavaScript
+├── package.json           # Dependencies and scripts
+└── README.md             # This file
+```
+
+## 🔧 Technical Details
+
+### Browser Automation
+
+The scraper uses Playwright to:
+- Navigate to namegrep.com
+- Fill in search forms
+- Handle JavaScript-rendered content
+- Extract domain results
+- Handle anti-bot protection
+
+### API Response Format
+
 ```json
 {
   "success": true,
-  "pattern": "^pe.{2,3}a$",
+  "pattern": "test.*",
   "domains": ["example1.com", "example2.com"],
   "count": 2,
-  "timestamp": "2025-09-11T18:31:31.775Z"
+  "timestamp": "2025-09-14T07:31:09.440Z"
 }
 ```
 
-### Command Line
-- Display found domains in the console
-- Save results to a timestamped text file (e.g., `domains_1703123456789.txt`)
-- Show the total count of domains found
-- Save debug screenshots for troubleshooting
+### Frontend Features
 
-## Files
+- **Real-time search** with loading animations
+- **Domain cards** with click-to-copy functionality
+- **Bulk operations** (copy all, download all)
+- **Share links** with hash-based URLs
+- **Error handling** with user-friendly messages
+- **Responsive design** for all screen sizes
 
-- `api.js` - Express API server that serves the frontend and handles scraping requests
-- `api-scraper.js` - Scraper optimized for API usage, filters for available .com domains
-- `scraper.js` - Original standalone scraper with comprehensive functionality
-- `simple-scraper.js` - Simplified version for basic testing
-- `public/` - Frontend files (HTML, CSS, JS)
-  - `index.html` - Main frontend interface
-  - `styles.css` - Modern, responsive styling
-  - `script.js` - Frontend JavaScript functionality
-- `package.json` - Project dependencies
-- `README.md` - This documentation
+## 🚨 Current Limitations
 
-## Requirements
+⚠️ **Important**: namegrep.com has implemented anti-scraping measures:
 
-- Node.js (v14 or higher)
-- Internet connection
-- Playwright browser binaries
+- **AJAX endpoint limited**: Only returns count, not actual domains
+- **Browser detection**: May block automated requests
+- **Rate limiting**: Too many requests may be blocked
 
-## Deployment
+The scraper still works but may return fewer results than expected.
+
+## 🛠️ Development
+
+### Available Scripts
+
+```bash
+npm run dev          # Start full-stack app (API + Frontend)
+npm run api          # Start API server only
+npm run start:frontend # Start frontend only (port 3000)
+npm test             # Run scraper backup
+npm run build        # Install dependencies and browsers
+```
+
+### Environment Variables
+
+- `PORT`: Server port (default: 3000)
+- `NODE_ENV`: Environment (development/production)
+
+## 📦 Deployment
 
 ### Render.com
+
 1. Connect your GitHub repository to Render
 2. Use these settings:
    - **Build Command**: `npm install && npx playwright install chromium`
    - **Start Command**: `npm start`
    - **Environment**: Node.js
-3. The app will be available at your Render URL
 
 ### Other Platforms
-- Ensure Playwright browsers are installed: `npx playwright install chromium`
-- Set `NODE_ENV=production` for production deployments
 
-## Troubleshooting
+Ensure Playwright browsers are installed:
+```bash
+npx playwright install chromium
+```
 
-### No Results Found
-If the scraper returns no domains or only JavaScript-related results, this could indicate:
+## 🤝 Contributing
 
-1. **Anti-bot protection**: The site might be detecting automated access
-2. **JavaScript requirements**: The search might require specific JavaScript execution
-3. **Site changes**: The website structure might have changed
-4. **Rate limiting**: Too many requests might be blocked
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
 
-### Debug Information
-The scraper creates several debug files:
-- `debug.png` - Initial page load
-- `results.png` - After search attempt
-- `after-trigger.png` - After JavaScript triggers
-- `simple-debug.png` and `simple-results.png` - From simple scraper
+## 📄 License
 
-Check these screenshots to see what the scraper is capturing.
+MIT License - see LICENSE file for details.
 
-### Alternative Approaches
-If the main scraper doesn't work:
-1. Try the simple scraper: `node simple-scraper.js "pattern"`
-2. Check if the website is accessible in a regular browser
-3. Verify the regex pattern syntax
-4. Try different patterns to test functionality
+## 🙏 Acknowledgments
 
-## Notes
+- **namegrep.com** for providing the domain search service
+- **Playwright** for browser automation
+- **Express.js** for the API server
+- **Memphis Design** inspiration for the vibrant UI
 
-- The scraper respects website loading times and includes appropriate delays
-- Results are automatically deduplicated and filtered for common false positives
-- The application uses a realistic user agent to avoid detection
-- Multiple search methods are attempted for better compatibility
-- Screenshots are automatically saved for debugging purposes
+---
+
+**Note**: This tool is for educational and research purposes. Please respect namegrep.com's terms of service and implement appropriate rate limiting in production use.

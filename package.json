@@ -1,24 +1,21 @@
 {
   "name": "namegrep-scraper",
   "version": "1.0.0",
-  "description": "A Node.js scraper for namegrep.com using headless browser",
-  "main": "check-browser.js",
+  "description": "A Node.js scraper for namegrep.com with Memphis design frontend",
+  "main": "api.js",
   "homepage": "https://github.com/peny/scrape-namegrep",
   "scripts": {
-    "start": "node check-browser.js",
-    "start:api": "node api-only-check-browser.js",
-    "start:frontend": "npx serve public -l 3000",
-    "build": "npm install && npm run install-browsers",
-    "heroku-postbuild": "npm run install-browsers",
-    "test": "node scraper-backup.js",
-    "api": "node api.js",
+    "start": "node api.js",
     "dev": "node api.js",
+    "api": "node api.js",
+    "start:frontend": "npx serve public -l 3000",
+    "test": "node scraper-backup.js",
     "scraper": "node scraper-backup.js",
-    "postinstall": "echo 'Installing Playwright browsers...' && npx playwright install chromium && echo 'Browser installation completed!'",
+    "build": "npm install && npm run install-browsers",
     "install-browsers": "npx playwright install chromium",
-    "prestart": "echo 'Pre-start: Checking browser installation...' && npx playwright install chromium"
+    "postinstall": "echo 'Installing Playwright browsers...' && npx playwright install chromium && echo 'Browser installation completed!'"
   },
-  "keywords": ["scraper", "puppeteer", "namegrep", "domains"],
+  "keywords": ["scraper", "playwright", "namegrep", "domains", "memphis-design", "regex"],
   "author": "",
   "license": "MIT",
   "dependencies": {

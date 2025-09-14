@@ -20,7 +20,7 @@ class DomainSearch {
         
         // API URL - use local API for development, production API for deployed frontend
         this.apiUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-            ? `http://${window.location.hostname}:3001` 
+            ? `http://${window.location.hostname}:3000` 
             : 'https://scrape-namegrep-api.onrender.com';
         
         this.currentDomains = [];
