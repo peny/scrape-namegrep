@@ -257,6 +257,13 @@ body {
     animation: spin 1s ease-in-out infinite;
 }
 
+/* Button spinner for hourglass emoji */
+.button-spinner {
+    display: none;
+    animation: spin 1s linear infinite;
+    font-size: 1.2rem;
+}
+
 @keyframes spin {
     to { transform: rotate(360deg); }
 }
@@ -531,16 +538,7 @@ body {
     transform: rotate(-0.3deg);
 }
 
-/* Additional Memphis decorations */
-.container::after {
-    content: '🎨';
-    position: fixed;
-    bottom: 20px;
-    left: 20px;
-    font-size: 2rem;
-    animation: float 3s ease-in-out infinite;
-    z-index: 1;
-}
+/* Additional Memphis decorations - removed color palette */
 
 @keyframes float {
     0%, 100% { transform: translateY(0px) rotate(0deg); }
