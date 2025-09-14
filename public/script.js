@@ -82,15 +82,7 @@ class DomainSearch {
                     : [];
                 this.currentDomains = filteredDomains;
                 
-                // Check if we got any .com domains back
-                if (!filteredDomains || filteredDomains.length === 0) {
-                    const hasSpecialChars = /[öäåÖÄÅ]/.test(this.currentPattern);
-                    const specialCharNote = hasSpecialChars ? 
-                        " (Obs: Specialtecken som ö, ä, å hanteras via URL-encoding men kan ge färre resultat)" : "";
-                    this.showError(`Inga tillgängliga domäner hittades för mönstret "${this.currentPattern}". Prova ett annat mönster!${specialCharNote}`);
-                    return;
-                }
-                
+                // Always show results, even if empty
                 this.showResults({ ...data, domains: filteredDomains, count: filteredDomains.length });
                 // Update URL hash for sharing
                 this.updateUrlHash(this.currentPattern);
@@ -124,10 +116,25 @@ class DomainSearch {
         this.countDisplay.textContent = `${data.count} domains found`;
         
         if (data.domains.length === 0) {
+            const hasSpecialChars = /[öäåÖÄÅ]/.test(data.pattern);
+            const specialCharNote = hasSpecialChars ? 
+                "<br><small>💡 <strong>Tips:</strong> Specialtecken som ö, ä, å kan ge färre resultat. Prova engelska bokstäver istället!</small>" : "";
+            
             this.domainsList.innerHTML = `
                 <div class="empty-state">
-                    <h3>No domains found</h3>
-                    <p>Try adjusting your regex pattern or check if the site is accessible.</p>
+                    <div class="empty-icon">🔍</div>
+                    <h3>Inga tillgängliga domäner hittades</h3>
+                    <p>För mönstret <code>"${data.pattern}"</code> hittades inga tillgängliga .com-domäner.</p>
+                    <div class="empty-suggestions">
+                        <p><strong>Prova dessa tips:</strong></p>
+                        <ul>
+                            <li>📝 Kontrollera stavningen i ditt mönster</li>
+                            <li>🎯 Använd enklare mönster först (t.ex. "test.*")</li>
+                            <li>🔄 Prova andra kombinationer av bokstäver</li>
+                            <li>💡 Använd knappen "📋 Examples" för inspiration</li>
+                        </ul>
+                    </div>
+                    ${specialCharNote}
                 </div>
             `;
         } else {
