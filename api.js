@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const { scrapeAvailableDomains } = require('./api-scraper');
+const { scrapeAvailableDomains } = require('./direct-ajax-scraper');
 const path = require('path');
 
 const app = express();
