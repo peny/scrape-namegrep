@@ -40,6 +40,12 @@ class DomainSearch {
         
         // Check for hash on page load
         this.checkHashOnLoad();
+
+        // Show default empty state on first load when no hash is present
+        if (!window.location.hash || !window.location.hash.startsWith('#search=')) {
+            const defaultPattern = document.getElementById('regexPattern')?.value || '';
+            this.showResults({ pattern: defaultPattern, count: 0, domains: [] });
+        }
     }
 
     async handleSearch(e) {

@@ -25,7 +25,7 @@ body {
 }
 
 .container {
-    max-width: 900px;
+    max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
     min-height: 100vh;
@@ -283,7 +283,7 @@ body {
 
 /* Results section */
 .results-section {
-    display: none;
+    display: block;
     background: rgba(255, 255, 255, 0.95);
     padding: 40px;
     border-radius: 60px 30px 60px 30px;
@@ -296,6 +296,46 @@ body {
     transform: rotate(-0.3deg);
     position: relative;
     z-index: 10;
+}
+
+/* Two-column layout */
+.main-grid {
+    display: grid;
+    grid-template-columns: 420px 1fr;
+    gap: 30px;
+    align-items: start;
+}
+
+.left-pane {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.right-pane {
+    min-width: 0;
+}
+
+.info-card {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 20px;
+    border-radius: 25px 50px 25px 50px;
+    border: 4px solid #2c3e50;
+    box-shadow: 8px 8px 0px #ff9ff3, 14px 14px 0px #54a0ff;
+}
+
+.info-card h3 {
+    font-family: 'Bungee', cursive;
+    color: #2c3e50;
+    margin-bottom: 8px;
+}
+
+.results-meta {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+    color: #7f8c8d;
 }
 
 .results-section::before {
@@ -476,6 +516,10 @@ body {
 
 /* Responsive design */
 @media (max-width: 768px) {
+    .main-grid {
+        display: block;
+    }
+
     .container {
         padding: 10px;
     }
