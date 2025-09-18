@@ -17,75 +17,66 @@
             <p class="subtitle">Hitta tillgängliga .com-domäner med regex-mönster</p>
         </header>
 
-        <main class="main main-grid">
-            <aside class="left-pane">
-                <form class="search-form" id="searchForm">
-                    <div class="input-group">
-                        <label for="regexPattern" class="input-label">Regex Pattern:</label>
-                        <input 
-                            type="text" 
-                            id="regexPattern" 
-                            name="regexPattern" 
-                            class="search-input"
-                            placeholder="Enter regex pattern (e.g., (konsonant)(vokal)(konsonant)are)"
-                            value="(konsonant)(vokal)(konsonant)are"
-                            required
-                        >
-                        <div class="input-help">
-                            <small>Use regex syntax or friendly patterns.<br>
-                            <strong>Example:</strong> <code>(konsonant)(vokal)(konsonant)are</code><br>
-                            finds domains with consonant-vowel-consonant followed by "are"</small>
-                        </div>
-                    </div>
-                    
-                    <div class="button-group">
-                        <button type="submit" class="search-button" id="searchButton">
-                            <span class="button-text">Search Domains</span>
-                            <span class="button-spinner" id="spinner" style="display: none;">⏳</span>
-                        </button>
-                        <button type="button" class="examples-button" id="examplesButton">
-                            📋 Examples
-                        </button>
-                    </div>
-                </form>
-
-                <div class="info-card">
-                    <h3>How it works</h3>
-                    <p>Search NameGrep with regex or friendly tokens like <code>(konsonant)</code> and <code>(vokal)</code>. Results show available .com domains.</p>
-                </div>
-
-                <div class="error-section" id="errorSection" style="display: none;">
-                    <div class="error-message" id="errorMessage"></div>
-                </div>
-            </aside>
-
-            <section class="right-pane">
-                <div class="results-section" id="resultsSection">
-                    <div class="results-header">
-                        <h2 class="results-title">Search Results</h2>
-                        <div class="results-meta">
-                            <span class="pattern-display" id="patternDisplay"></span>
-                            <span class="count-display" id="countDisplay"></span>
-                        </div>
-                    </div>
-                    
-                    <div class="results-actions results-actions-top">
-                        <button class="action-button" id="copyButtonTop">📋 Copy Results</button>
-                        <button class="action-button" id="downloadButtonTop">💾 Download as TXT</button>
-                        <button class="action-button share-button" id="shareButtonTop">🔗 Share Results</button>
-                    </div>
-                    
-                    <div class="domains-container">
-                        <div class="domains-list" id="domainsList"></div>
-                    </div>
-                    
-                    <div class="results-actions results-actions-bottom">
-                        <button class="action-button" id="copyButton">📋 Copy Results</button>
-                        <button class="action-button" id="downloadButton">💾 Download as TXT</button>
-                        <button class="action-button share-button" id="shareButton">🔗 Share Results</button>
+        <main class="main">
+            <form class="search-form" id="searchForm">
+                <div class="input-group">
+                    <label for="regexPattern" class="input-label">Regex Pattern:</label>
+                    <input 
+                        type="text" 
+                        id="regexPattern" 
+                        name="regexPattern" 
+                        class="search-input"
+                        placeholder="Enter regex pattern (e.g., (konsonant)(vokal)(konsonant)are)"
+                        value="(konsonant)(vokal)(konsonant)are"
+                        required
+                    >
+                    <div class="input-help">
+                        <small>Use regex syntax or friendly patterns.<br>
+                        <strong>Example:</strong> <code>(konsonant)(vokal)(konsonant)are</code><br>
+                        finds domains with consonant-vowel-consonant followed by "are"</small>
                     </div>
                 </div>
-            </section>
+                
+                <div class="button-group">
+                    <button type="submit" class="search-button" id="searchButton">
+                        <span class="button-text">Search Domains</span>
+                        <span class="button-spinner" id="spinner" style="display: none;">⏳</span>
+                    </button>
+                    <button type="button" class="examples-button" id="examplesButton">
+                        📋 Examples
+                    </button>
+                </div>
+            </form>
+
+            <div class="results-section" id="resultsSection" style="display: none;">
+                <div class="results-header">
+                    <h2 class="results-title">Search Results</h2>
+                    <div class="results-meta">
+                        <span class="pattern-display" id="patternDisplay"></span>
+                        <span class="count-display" id="countDisplay"></span>
+                    </div>
+                </div>
+                
+                <div class="results-actions results-actions-top">
+                    <button class="action-button" id="copyButtonTop">📋 Copy Results</button>
+                    <button class="action-button" id="downloadButtonTop">💾 Download as TXT</button>
+                    <button class="action-button share-button" id="shareButtonTop">🔗 Share Results</button>
+                </div>
+                
+                <div class="domains-container">
+                    <div class="domains-list" id="domainsList"></div>
+                </div>
+                
+                <div class="results-actions results-actions-bottom">
+                    <button class="action-button" id="copyButton">📋 Copy Results</button>
+                    <button class="action-button" id="downloadButton">💾 Download as TXT</button>
+                    <button class="action-button share-button" id="shareButton">🔗 Share Results</button>
+                </div>
+            </div>
+
+            <div class="error-section" id="errorSection" style="display: none;">
+                <div class="error-message" id="errorMessage"></div>
+            </div>
         </main>
 
         <footer class="footer">
