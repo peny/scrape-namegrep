@@ -3,12 +3,8 @@ services:
     name: scrape-namegrep-api
     env: node
     nodeVersion: 20
-    buildCommand: ./build.sh
-    startCommand: npm run start:api
+    buildCommand: npm install
+    startCommand: node api/index.js
     envVars:
       - key: NODE_ENV
         value: production
-      - key: PLAYWRIGHT_BROWSERS_PATH
-        value: 0
-      - key: PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD
-        value: 0

@@ -133,14 +133,9 @@ The frontend features a vibrant Memphis design with:
 
 ## 🔧 Technical Details
 
-### Browser Automation
+### How results are fetched
 
-The scraper uses Playwright to:
-- Navigate to namegrep.com
-- Fill in search forms
-- Handle JavaScript-rendered content
-- Extract domain results
-- Handle anti-bot protection
+The backend calls NameGrep's public AJAX endpoint directly and parses the JSON response client-side on our server. No headless browser is used.
 
 ### API Response Format
 
@@ -178,11 +173,9 @@ The scraper still works but may return fewer results than expected.
 ### Available Scripts
 
 ```bash
-npm run dev          # Start full-stack app (API + Frontend)
+npm start            # Start full-stack app (API + Frontend)
 npm run api          # Start API server only
 npm run start:frontend # Start frontend only (port 3000)
-npm test             # Run scraper backup
-npm run build        # Install dependencies and browsers
 ```
 
 ### Environment Variables
