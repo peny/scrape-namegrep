@@ -148,13 +148,17 @@ body {
 }
 
 .input-help code {
+    display: block;
     background: linear-gradient(135deg, #ff6b9d, #f8b500);
     color: white;
-    padding: 4px 8px;
+    padding: 6px 10px;
     border-radius: 12px;
-    font-family: 'Bungee', cursive;
-    font-size: 0.9rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 0.95rem;
     border: 2px solid #2c3e50;
+    margin: 8px 0;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
 }
 
 /* Button group */
@@ -647,13 +651,28 @@ body {
 }
 
 .empty-state code {
+    display: block;
     background: linear-gradient(135deg, #ff6b9d, #f8b500);
     color: white;
-    padding: 4px 8px;
-    border-radius: 8px;
-    font-family: 'Bungee', cursive;
-    font-size: 0.9rem;
+    padding: 6px 10px;
+    border-radius: 10px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 0.95rem;
     border: 2px solid #2c3e50;
+    margin: 8px 0;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+/* General code fallback to avoid funky line breaks */
+code {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.pattern-display {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
 }
 
 .empty-suggestions {
