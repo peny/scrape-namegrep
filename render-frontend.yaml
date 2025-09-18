@@ -1,10 +1,14 @@
 services:
-  - type: web
+  - type: static
     name: scrape-namegrep-frontend
-    env: node
-    nodeVersion: 20
-    buildCommand: npm install
-    startCommand: npm run start:frontend
-    envVars:
-      - key: NODE_ENV
-        value: production
+    env: static
+    buildCommand: ''
+    staticPublishPath: public
+    headers:
+      - path: /
+        name: Cache-Control
+        value: public, max-age=60
+    routes:
+      - type: rewrite
+        source: /index.html
+        destination: /
