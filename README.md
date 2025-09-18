@@ -36,9 +36,9 @@ npx playwright install chromium
 
 #### 🌐 Web Interface (Recommended)
 
-Start the full-stack application:
+Start the full-stack application (API + frontend on the same port):
 ```bash
-npm run dev
+npm start
 ```
 
 Then open http://localhost:3000 in your browser.
@@ -195,10 +195,15 @@ npm run build        # Install dependencies and browsers
 ### Render.com
 
 1. Connect your GitHub repository to Render
-2. Use these settings:
-   - **Build Command**: `npm install && npx playwright install chromium`
-   - **Start Command**: `npm start`
-   - **Environment**: Node.js
+2. API service (Node):
+   - **Build Command**: `./build.sh`
+   - **Start Command**: `npm run start:api`
+   - **Environment**: Node.js 20
+3. Frontend (Static Site):
+   - Use `render-frontend.yaml` which defines a Static Site
+   - **Publish Directory**: `public`
+   - No build command needed
+4. Frontend will call the API automatically using production URL logic in `public/script.js`.
 
 ### Other Platforms
 
